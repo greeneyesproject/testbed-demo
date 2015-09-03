@@ -50,7 +50,7 @@ Since we know how much time and effort we needed to prepare a working OS for the
 The image is available without any warranty, but it can really get your life easier.
 
 #### Flashing your microSD card
-1. Download and `tar xf` the [mbr image](ftp://ftp.elet.polimi.it/outgoing/Luca.Bondi/greeneyes/bbb-mbr-20150903.tar.gz) and the [rootfs image](ftp://ftp.elet.polimi.it/outgoing/Luca.Bondi/greeneyes/bbb-rootfs-20150903.tar.gz)
+1. Download and `tar xf` the mbr image (ftp://ftp.elet.polimi.it/outgoing/Luca.Bondi/greeneyes/bbb-mbr-20150903.tar.gz) and the rootfs image (ftp://ftp.elet.polimi.it/outgoing/Luca.Bondi/greeneyes/bbb-rootfs-20150903.tar.gz)
 2. Insert yout SD card and check the device path (e.g. /dev/mmcblk0)
 3. Unmount all the SD card partitions
 4. Flash the MBR to the SD card: `sudo dd if=bbb-mbr-XXXXYYZZ.img of=/dev/mmcblk0`
@@ -68,7 +68,7 @@ Now it's time to check your hardware. If you already have installed the RadiumBo
 In your Linux PC terminal `cd thirdparty/lib-host` and `make`.
 If include files are missing, please add the include path to the Makefile or install your libraries to /usr/local/.
 
-Before cross-compiling thirdparty libraries please put the cross compiled OpenCV and Boost libraries respactively into /opt/boost-arm and /opt/opencv-arm. You can find a copy of these two libraries cross-compiled for the BeagleBone Black in the rootfs image or you can download them separately here: [Boost 1.57.0](ftp://ftp.elet.polimi.it/outgoing/Luca.Bondi/greeneyes/boost-arm.tar.gz), [OpenCV 2.4.11](ftp://ftp.elet.polimi.it/outgoing/Luca.Bondi/greeneyes/opencv-arm.tar.gz).
+Before cross-compiling thirdparty libraries please put the cross compiled OpenCV and Boost libraries respactively into /opt/boost-arm and /opt/opencv-arm. You can find a copy of these two libraries cross-compiled for the BeagleBone Black in the rootfs image or you can download them separately from ftp://ftp.elet.polimi.it/outgoing/Luca.Bondi/greeneyes/boost-arm.tar.gz and ftp://ftp.elet.polimi.it/outgoing/Luca.Bondi/greeneyes/opencv-arm.tar.gz.
 
 Now you are able to cross-compile thirdparty libraries: `cd thirdparty/lib-bbb` and `make`.
 
