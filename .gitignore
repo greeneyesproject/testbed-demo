@@ -1,3 +1,5 @@
+### CPP ###
+
 # Compiled Object files
 *.slo
 *.lo
@@ -26,3 +28,42 @@
 *.exe
 *.out
 *.app
+
+### Eclipse ###
+*.pydevproject
+.metadata
+.gradle
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+# PDT-specific
+.buildpath
+
+# sbteclipse plugin
+.target
+
+### QT Creator ###
+*.pro.user
+
+### gedit ###
+*~
+
+### Project specific ###
+*build*/
+

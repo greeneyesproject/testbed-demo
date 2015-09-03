@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Plot</class>
+ <widget class="QWidget" name="Plot">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>438</width>
+    <height>509</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QWidget" name="gridLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>421</width>
+     <height>491</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout" rowstretch="1,1,1,1,1" rowminimumheight="0,0,0,0,0">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetNoConstraint</enum>
+    </property>
+    <item row="1" column="0">
+     <widget class="QCustomPlot" name="widget_upper" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QCustomPlot" name="widget_lower" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QComboBox" name="comboBox_upper">
+      <item>
+       <property name="text">
+        <string>Operation mode</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Framerate</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>ATC: detection threshold</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>ATC: max features</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>ATC: keypoint encoding</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>ATC: entropy coding</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>DATC: number of coops</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>CTA: quality factor</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Energy</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QComboBox" name="comboBox_lower">
+      <property name="currentText">
+       <string>Operation mode</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>Operation mode</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Framerate</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>ATC: detection threshold</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>ATC: max features</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>ATC: keypoint encoding</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>ATC: entropy coding</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>DATC: number of coops</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>CTA: quality factor</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Energy</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>QCustomPlot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

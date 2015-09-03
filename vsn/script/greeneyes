@@ -1,0 +1,78 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:          greeneyes-vsn
+# Required-Start:    $local_fs $network
+# Required-Stop:     $local_fs
+# Default-Start:     4 5
+# Default-Stop:      0 1 6
+# Short-Description: GreenEyes VSN
+# Description:       Startup initialization script for GreenEyes VSN
+### END INIT INFO
+
+# Carry out specific functions when asked to by the system
+case "$1" in
+  start)
+    echo "Starting GreenEyes VSN "
+		cd /opt/greeneyes-vsn
+		
+		case "$(pidof greeneyes-vsn | wc -w)" in
+		1) echo "GreenEyes VSN already running. Please run 'sudo service greeneyes restart'"
+
+			exit 1
+			;;
+		esac
+
+		if [ -f log.txt ]
+		then mv log.txt log.prev.txt
+		fi
+		
+		ifup wlan0 >>log.txt 2>&1
+		sleep 5
+		ifdown wlan0 >>log.txt 2>&1
+
+		#Camera
+		cpufreq-set -f 600M >>log.txt 2>&1
+		#Cooperator
+		#cpufreq-set -g ondemand --max 1000M >>log.txt 2>&1
+
+		ifup wlan0 >>log.txt 2>&1
+		iwlist wlan0 scan >>log.txt 2>&1
+
+		#Camera 1
+		ifconfig wlan0 192.168.200.55 netmask 255.255.255.0 >>log.txt 2>&1
+		./greeneyes-vsn camera 11 --telos /dev/ttyUSB0 >>log.txt 2>&1 &
+		#Camera 2
+		#ifconfig wlan0 192.168.200.56 netmask 255.255.255.0 >>log.txt 2>&1		
+		#./greeneyes-vsn camera 12 --telos /dev/ttyUSB0 >>log.txt 2>&1 &
+		
+		#Cooperator 1		
+		#./greeneyes-vsn cooperator 21 >>log.txt 2>&1 &
+		#Cooperator 2
+		#./greeneyes-vsn cooperator 22 >>log.txt 2>&1 &
+    ;;
+  stop)
+    echo "Stopping GreenEyes VSN"
+    
+    case "$(pidof greeneyes-vsn | wc -w)" in
+	0) echo "GreenEyes VSN already stopped."
+	exit 0;
+	;;
+    esac
+    pkill -quit greeneyes-vsn
+    sleep 5
+
+    ;;
+  restart)
+    echo "Restarting GreenEyes VSN"
+	service greeneyes stop
+	service greeneyes start
+
+    ;;
+  *)
+    echo "Usage: sudo service greeneyes {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0

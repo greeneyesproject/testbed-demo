@@ -1,0 +1,81 @@
+<?xml version="1.0" ?>
+<parking id="deib">
+  <space id="1">
+    <rotatedRect>
+      <center x="466" y="352"/>
+      <size h="133" w="99"/>
+      <angle d="-2"/>
+    </rotatedRect>
+    <contour>
+      <point x="415" y="288"/>
+      <point x="514" y="284"/>
+      <point x="518" y="417"/>
+      <point x="419" y="420"/>
+    </contour>
+  </space>
+  <space id="2">
+    <rotatedRect>
+      <center x="573" y="349"/>
+      <size h="128" w="96"/>
+      <angle d="-6"/>
+    </rotatedRect>
+    <contour>
+      <point x="519" y="289"/>
+      <point x="615" y="281"/>
+      <point x="627" y="409"/>
+      <point x="531" y="417"/>
+    </contour>
+  </space>
+  <space id="3">
+    <rotatedRect>
+      <center x="365" y="349"/>
+      <size h="123" w="93"/>
+      <angle d="-3"/>
+    </rotatedRect>
+    <contour>
+      <point x="409" y="286"/>
+      <point x="316" y="290"/>
+      <point x="321" y="413"/>
+      <point x="414" y="409"/>
+    </contour>
+  </space>
+  <space id="4">
+    <rotatedRect>
+      <center x="270" y="339"/>
+      <size h="119" w="90"/>
+      <angle d="-175"/>
+    </rotatedRect>
+    <contour>
+      <point x="321" y="284"/>
+      <point x="231" y="275"/>
+      <point x="220" y="394"/>
+      <point x="309" y="403"/>
+    </contour>
+  </space>
+  <space id="5">
+    <rotatedRect>
+      <center x="172" y="348"/>
+      <size h="127" w="85"/>
+      <angle d="13"/>
+    </rotatedRect>
+    <contour>
+      <point x="116" y="400"/>
+      <point x="146" y="276"/>
+      <point x="229" y="297"/>
+      <point x="198" y="421"/>
+    </contour>
+  </space>
+  <space id="6">
+    <rotatedRect>
+      <center x="77" y="351"/>
+      <size h="123" w="77"/>
+      <angle d="16"/>
+    </rotatedRect>
+    <contour>
+      <point x="22" y="399"/>
+      <point x="58" y="281"/>
+      <point x="132" y="304"/>
+      <point x="96" y="422"/>
+    </contour>
+  </space>
+</parking>

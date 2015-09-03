@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<network>
+    
+    <item class="gui" ip_address="127.0.0.1" ip_port_server="1234"></item>
+	<item row="4" col="6" class="sink" id="1" am_address="1" ip_address="192.168.200.51" ip_port_server="2345" enabled="1"></item>
+	
+	<item row="2" col="4" class="camera" id="11" am_address="11" ip_address="192.168.200.55" ip_port_server="3456" energy_budget="10000" enabled="1"></item>
+	<item row="4" col="4" class="camera" id="12" am_address="12" ip_address="192.168.200.56" ip_port_server="3457" energy_budget="10000" enabled="1"></item>
+	
+	<item row="2" col="2" class="cooperator" id="21" enabled="1"></item>
+	<item row="4" col="2" class="cooperator" id="22" enabled="1"></item>
+
+	<link source_id="11" dest_id="1" enabled="1"></link>
+	<link source_id="12" dest_id="1" enabled="1"></link>
+	
+	<link source_id="21" dest_id="12" enabled="1" ></link>
+	<link source_id="22" dest_id="12" enabled="1" ></link>
+	
+</network>
