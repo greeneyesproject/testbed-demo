@@ -91,8 +91,9 @@ Now you should have three executable files: `vsn/build-host/greeneyes-vsn`, `vsn
 First we need to upload the vsn software to the BeagleBone and configure the service to start the ad-hoc WiFi connection and the vsn software ad startup.
 From the `vsn/` folder upload the csv software with the provided script `./script/sendToBBB.sh debian@192.168.7.2`. This will copy all the needed files into `/opt/greeneyes-vsn`.
 
-Now ssh into the BeagleBone, modify the `/opt/greeneyes-vsn/greeneyes` startup script as needed to select the role of the BeagleBone and copy `/opt/greeneyes-vsn/greeneyes` to `/etc/init.d/greeneyes` and make it executable (`chmod +x /etc/init.d/greeneyes`).
-Start the greeneyes service and check the log file at `/opt/greeneyes-vsn/log.txt`
+Now ssh into the BeagleBone, modify the `/opt/greeneyes-vsn/greeneyes` startup script as needed to select the role of the BeagleBone and copy `/opt/greeneyes-vsn/greeneyes` to `/etc/init.d/greeneyes` and make it executable (`chmod +x /etc/init.d/greeneyes`). Make the service start at boot with `sudo update-rc.d greeneyes defaults`.
+Start the greeneyes service and check the log file at `/opt/greeneyes-vsn/log.txt`.
+
 
 To configure multiple BeagleBone repeat the procedure above for each one. The service script configures different ip address in the ad-hoc wlan for each network node.
 
