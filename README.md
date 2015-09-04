@@ -6,8 +6,6 @@ The software provided here is a sample application easily extensible and re-usab
 
 This document will guide you step-by-step to the setup and use of the provided software. This manual has been tested on Ubuntu 14.04LTS 64bit.
 
-If you are not familiar with linux bash, ssh, make and c++ programming you should probably stop here and come back after having attended a computer science class.
-
 ### Prerequisites
 
 * Linux equipped PC with
@@ -112,6 +110,5 @@ To configure multiple BeagleBone repeat the procedure above for each one. The se
 5. From the `vsn/` folder launch the SINK node with `./build-host/greeneyes-vsn sink 1 --telos /dev/ttyUSB0`
 6. From the GUI control the system and enjoy your running Visual Senso Network
 
-## Credits
 
 
