@@ -48,7 +48,7 @@ Since we know how much time and effort we needed to prepare a working OS for the
 The image is available without any warranty, but it can really get your life easier.
 
 #### Flashing your microSD card
-1. Download and `tar xf` the mbr image (ftp://ftp.elet.polimi.it/outgoing/Luca.Bondi/greeneyes/bbb-mbr-20150903.tar.gz) and the rootfs image (ftp://ftp.elet.polimi.it/outgoing/Luca.Bondi/greeneyes/bbb-rootfs-20150903.tar.gz)
+1. Download and `tar xf` the mbr image (ftp://ftp.elet.polimi.it/outgoing/Luca.Bondi/greeneyes/bbb-mbr-20150904.tar.gz) and the rootfs image (ftp://ftp.elet.polimi.it/outgoing/Luca.Bondi/greeneyes/bbb-rootfs-20150904.tar.gz)
 2. Insert yout SD card and check the device path (e.g. /dev/mmcblk0)
 3. Unmount all the SD card partitions
 4. Flash the MBR to the SD card: `sudo dd if=bbb-mbr-XXXXYYZZ.img of=/dev/mmcblk0`
