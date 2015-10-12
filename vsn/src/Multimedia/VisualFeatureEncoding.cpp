@@ -308,7 +308,7 @@ bool VisualFeatureEncoding::_encodeBRISK(const Mat& features,
 	BRISK_pModel *pModel = BRISK_pModel::get_instance();
 
 	if (_DEBUG)
-		cout << "VisualFeatureEncoding::encodeBRISK" << endl;
+		cout << "VisualFeatureEncoding::_encodeBRISK" << endl;
 	ac_encoder ace; // the encoder
 	ac_model acm; // the probability model used by ace
 

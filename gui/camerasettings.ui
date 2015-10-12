@@ -410,7 +410,7 @@
      <number>20</number>
     </property>
     <property name="maximum">
-     <number>9000</number>
+     <number>8000</number>
     </property>
     <property name="singleStep">
      <number>30</number>
@@ -440,16 +440,16 @@
      <string> kbps</string>
     </property>
     <property name="minimum">
-     <number>20</number>
+     <number>1</number>
     </property>
     <property name="maximum">
-     <number>9000</number>
+     <number>8000</number>
     </property>
     <property name="singleStep">
      <number>50</number>
     </property>
     <property name="value">
-     <number>23</number>
+     <number>1</number>
     </property>
    </widget>
   </widget>
@@ -938,8 +938,8 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_operativeMode"/>
   <buttongroup name="buttonGroup_ATC_CTA"/>
+  <buttongroup name="buttonGroup_operativeMode"/>
   <buttongroup name="buttonGroup_sinkCameraLink"/>
  </buttongroups>
 </ui>

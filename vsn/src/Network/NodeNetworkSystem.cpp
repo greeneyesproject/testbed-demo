@@ -22,7 +22,6 @@ unsigned short NodeNetworkSystem::_queuedMessages = 0;
 BlackLib::BlackGPIO** NodeNetworkSystem::_gpios = NULL;
 
 NodeNetworkSystem* NodeNetworkSystem::getInstance(
-		NodeProcessingSystem* nodeProcessingSystem,
 		boost::asio::io_service& ioService,
 		const std::vector<std::string> serverIps,
 		const std::vector<uint16_t> serverPorts, const std::string telosDevPath,
@@ -30,13 +29,13 @@ NodeNetworkSystem* NodeNetworkSystem::getInstance(
 	if (_DEBUG)
 		cout << "NodeNetworkSystem::getInstance" << endl;
 	if (_instance == NULL) {
-		_instance = new NodeNetworkSystem(nodeProcessingSystem, ioService,
+		_instance = new NodeNetworkSystem(ioService,
 				serverIps, serverPorts, telosDevPath, gpios);
 	}
 	return _instance;
 }
 
-NodeNetworkSystem::NodeNetworkSystem(NodeProcessingSystem* nodeProcessingSystem,
+NodeNetworkSystem::NodeNetworkSystem(
 		boost::asio::io_service& ioService,
 		const std::vector<std::string> remoteIps,
 		const std::vector<uint16_t> remotePorts, const std::string telosDevPath,
@@ -49,7 +48,7 @@ NodeNetworkSystem::NodeNetworkSystem(NodeProcessingSystem* nodeProcessingSystem,
 		cout << "NodeNetworkSystem::NodeNetworkSystem" << endl;
 
 	/*
-	 * Aruments checker
+	 * Arguments checker
 	 */
 	if (!(remoteIps.size() == remotePorts.size())) {
 		if (_DEBUG)
@@ -59,8 +58,7 @@ NodeNetworkSystem::NodeNetworkSystem(NodeProcessingSystem* nodeProcessingSystem,
 		exit(-1);
 	}
 
-	_nodeProcessingSystem = nodeProcessingSystem;
-	_nodeProcessingSystem->setNodeNetworkSystem(this);
+	_nodeProcessingSystem = NULL;
 
 	_offloadingManager = OffloadingManager::getInstance(_nodeProcessingSystem,
 			this);
@@ -105,7 +103,9 @@ NodeNetworkSystem::NodeNetworkSystem(NodeProcessingSystem* nodeProcessingSystem,
 				client->getSession());
 	}
 
-	_wifiBandwidth = 55296;
+	_wifiBandwidth = 8000;
+
+	_linkInterface = "wlan0";
 
 }
 
@@ -384,8 +384,30 @@ float NodeNetworkSystem::prepareWifiBandwidthControl(const string sinkIpAddr_,
 	stringstream ss;
 	int ret;
 
+	/* Determine the network interface used to communicate with the sink */
 	ss.str("");
-	ss << "sudo tc qdisc del dev wlan0 root" << endl;
+	ss << "ip route get " << sinkIpAddr_ << " | sed -n 1p |  grep -oP \"(?<=dev )[^ ]+\"" << endl;
+	FILE *linkProbe_fp = popen(ss.str().c_str(), "r");
+
+	if (!linkProbe_fp){
+		/* Unable to determine the interface. Assuming wlan0 */
+		_linkInterface = "wlan0";
+	}
+
+	char buffer[16];
+	char *line_p = fgets(buffer, sizeof(buffer), linkProbe_fp);
+
+	size_t len = strlen(line_p);
+	line_p[len-1] = '\0';
+
+	_linkInterface = line_p;
+	pclose(linkProbe_fp);
+
+	if (_DEBUG)
+		cout << "NodeProcessingSystem::_prepareWifiBandwidthControl: _linkInterface: " << _linkInterface << endl;
+
+	ss.str("");
+	ss << "sudo tc qdisc del dev " << _linkInterface << " root" << endl;
 	if (_DEBUG)
 		cout << "NodeProcessingSystem::_prepareWifiBandwidthControl: "
 				<< ss.str();
@@ -396,7 +418,7 @@ float NodeNetworkSystem::prepareWifiBandwidthControl(const string sinkIpAddr_,
 
 	ss.str("");
 	ss
-			<< "sudo tc qdisc add dev wlan0 root handle 1: cbq avpkt 1000 bandwidth 54mbit"
+			<< "sudo tc qdisc add dev " << _linkInterface << " root handle 1: cbq avpkt 1000 bandwidth 54mbit"
 			<< endl;
 	if (_DEBUG)
 		cout << "NodeProcessingSystem::_prepareWifiBandwidthControl: "
@@ -408,7 +430,8 @@ float NodeNetworkSystem::prepareWifiBandwidthControl(const string sinkIpAddr_,
 
 	ss.str("");
 	ss
-			<< "sudo tc class replace dev wlan0 parent 1: classid 1:1 cbq rate 54mbit allot 1500 prio 5 bounded isolated"
+			<< "sudo tc class replace dev " << _linkInterface << " parent 1: classid 1:1 cbq rate "
+			<< _wifiBandwidth << "kbit allot 1500 prio 5 bounded isolated"
 			<< endl;
 	if (_DEBUG)
 		cout << "NodeProcessingSystem::_prepareWifiBandwidthControl: "
@@ -420,7 +443,7 @@ float NodeNetworkSystem::prepareWifiBandwidthControl(const string sinkIpAddr_,
 
 	ss.str("");
 	ss
-			<< "sudo tc filter add dev wlan0 parent 1: protocol ip prio 16 handle 100 fw flowid 1:1"
+			<< "sudo tc filter add dev " << _linkInterface << " parent 1: protocol ip prio 16 handle 100 fw flowid 1:1"
 			<< endl;
 	if (_DEBUG)
 		cout << "NodeProcessingSystem::_prepareWifiBandwidthControl: "
@@ -457,7 +480,7 @@ float NodeNetworkSystem::setWifiBandwidth(const ushort bw_) {
 
 	stringstream ss;
 	ss.str("");
-	ss << "sudo tc class replace dev wlan0 parent 1: classid 1:1 cbq rate "
+	ss << "sudo tc class replace dev " << _linkInterface << " parent 1: classid 1:1 cbq rate "
 			<< _wifiBandwidth << "kbit allot 1500 prio 5 bounded isolated"
 			<< endl;
 

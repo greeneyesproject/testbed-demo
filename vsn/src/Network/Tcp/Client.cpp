@@ -38,6 +38,9 @@ void Client::_connect(const boost::system::error_code& error) {
 	if (error) {
 		if (_DEBUG)
 			cerr << "Client::_connect: " << error.message() << endl;
+		if (error == boost::system::errc::operation_canceled){
+			return;
+		}
 	}
 	if (_localPort) {
 		try {

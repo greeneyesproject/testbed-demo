@@ -340,15 +340,16 @@ int main(int argc, char ** argv) {
 		ss << "pklot/camera" << (int) nodeId << "_%04d.jpg";
 	}
 
+	/* Create the NodeNetworkSystem. Needs to be instantiated before the NodeProcessingSystem */
+	NodeNetworkSystem* nodeNetworkSystem = NodeNetworkSystem::getInstance(
+			io_service, remoteIps,
+			remotePorts, telosDevPath, gpios);
+
 	/* Create the NodeProcessingSystem */
 	NodeProcessingSystem* nodeProcessingSystem =
-			NodeProcessingSystem::getInstance(nodeType,
+			NodeProcessingSystem::getInstance(nodeNetworkSystem,nodeType,
 					CameraParameters(cameraId, ss.str(), cv::Size(640, 480),
 							cameraFlip), oneShot, gpios);
-
-	/* Create the NodeNetworkSystem */
-	NodeNetworkSystem::getInstance(nodeProcessingSystem, io_service, remoteIps,
-			remotePorts, telosDevPath, gpios);
 
 	gpios[0]->setValue(BlackLib::low);  //Reset loading pin
 

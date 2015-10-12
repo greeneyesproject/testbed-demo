@@ -28,7 +28,7 @@ class NodeNetworkSystem: public ServerClientInterface {
 
 public:
 
-	static NodeNetworkSystem* getInstance(NodeProcessingSystem*,
+	static NodeNetworkSystem* getInstance(
 			boost::asio::io_service& ioService,
 			const std::vector<std::string> remoteIps,
 			const std::vector<uint16_t> remotePorts,
@@ -36,6 +36,10 @@ public:
 			BlackLib::BlackGPIO** gpios = NULL);
 
 	static void shutdown(const int signal);
+
+	void setNodeProcessingSystem(NodeProcessingSystem* nps_){
+		_nodeProcessingSystem = nps_;
+	}
 
 	static void stopOnSendEnd();
 
@@ -67,7 +71,7 @@ private:
 
 	const static unsigned char _DEBUG = 1;
 
-	NodeNetworkSystem(NodeProcessingSystem* nodeProcessingSystem,
+	NodeNetworkSystem(
 			boost::asio::io_service& ioService,
 			const std::vector<std::string> remoteIps,
 			const std::vector<uint16_t> remotePorts,
@@ -95,6 +99,9 @@ private:
 	static unsigned short _queuedMessages;
 
 	ushort _wifiBandwidth;
+
+	/* Interface used to communicate with the sink */
+	string _linkInterface;
 
 };
 

@@ -78,7 +78,7 @@ enum atc_coding_info {FULL = 0, DESCONLY = 1};
 enum plot_var {OP_MODE = 0, FRAMERATE = 1, DET_TH = 2, MAX_F = 3, ENCODE_KP = 4, ENTROPY = 5, COOP = 6, QF = 7, ENERGY = 8, PLOT_VAR_SIZE = 9};
 
 
-#define PATH_BRISK_FILES PROJECT_PATH "../testbed-v2/util/brisk"
+#define PATH_BRISK_FILES PROJECT_PATH "../vsn/util/brisk"
 
 #define BUFFER_SIZE 500000
 

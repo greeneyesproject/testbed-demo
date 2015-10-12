@@ -84,7 +84,7 @@ private:
 
 	BlackLib::BlackGPIO** _gpios;
 
-	NodeProcessingSystem(const NodeType,
+	NodeProcessingSystem(NodeNetworkSystem*, const NodeType,
 			const CameraParameters& cameraParameters, const bool oneShot,
 			BlackLib::BlackGPIO** gpios);
 
@@ -149,14 +149,10 @@ public:
 
 	static NodeProcessingSystem* _instance;
 
-	static NodeProcessingSystem* getInstance(NodeType const,
+	static NodeProcessingSystem* getInstance(NodeNetworkSystem*, NodeType const,
 			const CameraParameters& cameraParameters = CameraParameters(0, "",
 					cv::Size(640, 480), false), const bool oneShot = false,
 			BlackLib::BlackGPIO** gpios = NULL);
-
-	void setNodeNetworkSystem(NodeNetworkSystem* const nodeNetworkSystem) {
-		_nodeNetworkSystem = nodeNetworkSystem;
-	}
 
 	NodeType getNodeType() const {
 		return _nodeType;

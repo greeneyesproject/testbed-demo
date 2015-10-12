@@ -25,18 +25,18 @@
 
 NodeProcessingSystem* NodeProcessingSystem::_instance = NULL;
 
-NodeProcessingSystem* NodeProcessingSystem::getInstance(const NodeType nodeType,
+NodeProcessingSystem* NodeProcessingSystem::getInstance(NodeNetworkSystem* nns_, const NodeType nodeType,
 		const CameraParameters& cameraParameters, const bool oneShot,
 		BlackLib::BlackGPIO** gpios) {
 	if (_instance == NULL) {
-		_instance = new NodeProcessingSystem(nodeType, cameraParameters,
+		_instance = new NodeProcessingSystem(nns_, nodeType, cameraParameters,
 				oneShot, gpios);
 	}
 	return _instance;
 
 }
 
-NodeProcessingSystem::NodeProcessingSystem(const NodeType nodeType,
+NodeProcessingSystem::NodeProcessingSystem(NodeNetworkSystem* nns_, const NodeType nodeType,
 		const CameraParameters& cameraParameters, const bool oneShot,
 		BlackLib::BlackGPIO** gpios) :
 		_processingQueue(_waitPeriod, 1), _serviceQueue(_waitPeriod) {
@@ -51,8 +51,9 @@ NodeProcessingSystem::NodeProcessingSystem(const NodeType nodeType,
 
 	_nodeType = nodeType;
 
-	_nodeNetworkSystem = NULL;
-	_offloadingManager = NULL;
+	_nodeNetworkSystem = nns_;
+	nns_->setNodeProcessingSystem(this);
+	_offloadingManager = OffloadingManager::getInstance();
 
 	_frameId = 0;
 
@@ -885,7 +886,18 @@ float NodeProcessingSystem::_encodeFeatures(const cv::Mat& features,
 	if (_DEBUG)
 		cout << "NodeProcessingSystem::_encodeFeatures: encoding " << endl;
 
+	if (_DEBUG > 1)
+		cout << "NodeProcessingSystem::_encodeFeatures: features: " << features.row(0).colRange(0,min(20,features.cols)) << endl;
+
 	_encoder->encodeDescriptors(parms, encoderType, features, bitstream);
+
+	if (_DEBUG > 1){
+		cout << "NodeProcessingSystem::_encodeFeatures: bitstream: ";
+		for (int i = 0; i < min(20,(int)bitstream.size()); ++i){
+			cout << (int)bitstream[i] << " ";
+		}
+		cout << endl;
+	}
 
 	return (cv::getTickCount() - time) / cv::getTickFrequency();
 }

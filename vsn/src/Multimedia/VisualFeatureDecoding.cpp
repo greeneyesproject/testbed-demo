@@ -113,14 +113,27 @@ bool VisualFeatureDecoding::decodeBinaryDescriptors(
 	//			order     -> the order in which the elements of each descriptor are fetched
 	// outputs: features  <- the decoded features
 
+    bool retval;
+
+    cout << "bitstream: ";
+    for (int i = 0; i < 20; ++i){
+        cout << (int)bitstream[i] << " ";
+    }
+    cout << endl;
+
+
 	switch (descType) {
 	case DESCRIPTORTYPE_BRISK:
-		return _decodeBRISK(bitstream, features, nFeats);
+        retval = _decodeBRISK(bitstream, features, nFeats);
 		break;
 	default:
-		return false;
+        retval = false;
 	}
 
+
+    cout << "features: " << features.row(0).colRange(0,min(10,features.cols)) << endl;
+
+    return retval;
 }
 
 
