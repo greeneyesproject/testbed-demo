@@ -25,7 +25,7 @@ CameraView::CameraView(Camera * camera, QWidget *parent, int tabIdx):
     connect(_cam, SIGNAL(residualEnergyUpdatedSignal()), this, SLOT(updateResidualEnergy()));
     //***NBS***//
     connect(_cam,SIGNAL(curBandwidthChangedSignal(int,double)),this,SLOT(updateBandwidthSlot(int,double)));
-    connect (_cam,SIGNAL(recognitionCompletedSignal(QString)),SLOT(updateObjectSlot(QString)));
+    connect (_cam,SIGNAL(recognitionCompletedSignal(QString,QString)),SLOT(updateRecognitionResultSlot(QString,QString)));
 
     ui->setupUi(this);
 
@@ -84,9 +84,12 @@ void CameraView::showATCRecFrame(){
 
 }
 
-void CameraView::updateObjectSlot(QString objName){
+void CameraView::updateRecognitionResultSlot(QString label, QString result){
 
-    ui->label_object->setText(objName);
+    if (label.length()){
+        ui->recognition_label->setText(label);
+    }
+    ui->recognition_result->setText(result);
 
 }
 

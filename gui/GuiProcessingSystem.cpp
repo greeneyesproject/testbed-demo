@@ -157,13 +157,12 @@ void GuiProcessingSystem::processDataCTAMsg(Camera *camera, DataCTAMsg* msg){
                 cv::Mat pklotImg = camera->getPklotOnlyOccupancy();
                 cur_img += PKLOT_CTA_ALPHA*pklotImg;
                 camera->showCTAFrame(cur_img);
-                emit camera->recognitionCompletedSignal(" -- "); //TODO accuracy
+                emit camera->recognitionCompletedSignal("Free parkings:",QString::number(predictions.rows - (int)(sum(predictions)[0])));
             }
             break;
         }
 
-        emit camera->frameCompletedSignal(camera->getGuiIdx(),msg->getOperativeMode());
-
+        emit camera->frameCompletedSignal(camera->getGuiIdx(),msg->getOperativeMode()); 
         endOfFrame(camera);
     }
 
@@ -357,7 +356,7 @@ void GuiProcessingSystem::processDataATCMsg(Camera* camera, DataATCMsg* msg){
                     camera->setPKLotPredictions(predictions);
                     cur_img = camera->getPklotWithOccupancy();
                     camera->showATCFrame(cur_img);
-                    emit camera->recognitionCompletedSignal(" -- "); //TODO accuracy
+                    emit camera->recognitionCompletedSignal("Free parkings:",QString::number(predictions.rows - (int)(sum(predictions)[0])));
                 }
                 break;
             }

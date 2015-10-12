@@ -37,7 +37,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QLabel" name="label_object">
+  <widget class="QLabel" name="recognition_result">
    <property name="geometry">
     <rect>
      <x>330</x>
@@ -176,7 +176,7 @@
     <string>100 %</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="recognition_label">
    <property name="geometry">
     <rect>
      <x>11</x>

@@ -755,7 +755,7 @@ void CameraSettings::recognitionToggledSlot(bool checked){
     _selectedCamera->setRecognitionEnabledSlot(checked);
     //qDebug() << "recognition is " << _selectedCamera->getRecognitionEnabled() << " on " << _selectedCamera;
     if (!checked)
-        emit _selectedCamera->recognitionCompletedSignal("--");
+        emit _selectedCamera->recognitionCompletedSignal("","--");
 
     setSelectedCameraParameters();
 }

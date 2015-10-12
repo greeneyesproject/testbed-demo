@@ -252,7 +252,7 @@ signals:
     void residualEnergyUpdatedSignal();
     //***NBS***//
 
-    void recognitionCompletedSignal(QString);
+    void recognitionCompletedSignal(QString label,QString result);
 
     void updateNumAvailableCooperatorsSignal(uint, int);
     void startSentSignal(int, bool); // if true, camera mode has been toggled by user

@@ -308,7 +308,7 @@ int ObjectTracking::trackObject(int camIdx, int opMode){
         else{
             rec_object = "not recognized";
         }
-        emit cur_cam->recognitionCompletedSignal(QString(rec_object.c_str()));
+        emit cur_cam->recognitionCompletedSignal("Object: ",QString(rec_object.c_str()));
 
         ////////////////////////////////////////////////////////////////////////
         // NEW BOUNDING BOX

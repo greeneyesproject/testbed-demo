@@ -33,7 +33,7 @@ public slots:
     void showCTAFrame();
     void showATCFrame();
     void showATCRecFrame();
-    void updateObjectSlot(QString);
+    void updateRecognitionResultSlot(QString label, QString result);
     void updateFrameRate();
     void updateBandwidthSlot(int,double);
     //***NBS***//
