@@ -33,6 +33,7 @@ private:
 	uchar _valShift;
 	uchar _numCooperators;
 	uchar _operativeMode;
+	uchar _imageSource;
 	Bitstream _keypoints;
 	ushort _wifiBandwidth;
 
@@ -47,8 +48,8 @@ public:
 			const ushort num_feat_per_blocks, const cv::Size topLeft,
 			const cv::Size bottomRight, const uchar binShift,
 			const uchar valShift, const uchar numCoops,
-			const OperativeMode opMode, const Bitstream& keypoints,
-			const ushort wifiBandwidth_);
+			const OperativeMode opMode, const ImageSource imageSource_,
+			const Bitstream& keypoints, const ushort wifiBandwidth_);
 
 	StartATCMsg(NetworkNode* const src, NetworkNode* const dst,
 			const LinkType linkType, Bitstream* const bitstream);
@@ -107,6 +108,9 @@ public:
 	}
 	OperativeMode getOperativeMode() const {
 		return (OperativeMode) _operativeMode;
+	}
+	ImageSource getImageSource() const {
+		return (ImageSource) _imageSource;
 	}
 	Bitstream getKeypoints() const {
 		return _keypoints;

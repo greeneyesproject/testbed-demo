@@ -13,7 +13,7 @@ using namespace std;
 
 StartCTAMsg::StartCTAMsg(NetworkNode* const src, NetworkNode* const dst,
 		const LinkType linkType, const uchar qf, const cv::Size size,
-		const uchar num_slices, const OperativeMode opMode, const ushort wifiBandwidth_) :
+		const uchar num_slices, const OperativeMode opMode, const ImageSource imageSource_,const ushort wifiBandwidth_) :
 		Message(src, dst, linkType) {
 
 	_msg_type = MESSAGETYPE_START_CTA;
@@ -23,6 +23,7 @@ StartCTAMsg::StartCTAMsg(NetworkNode* const src, NetworkNode* const dst,
 	_frameHeight = size.height;
 	_numSlices = num_slices;
 	_operativeMode = (uchar) opMode;
+	_imageSource = (uchar) imageSource_;
 	_wifiBandwidth = wifiBandwidth_;
 }
 
@@ -36,6 +37,7 @@ StartCTAMsg::StartCTAMsg(Header* const header, Bitstream* const bitstream) :
 	_frameHeight = 0;
 	_numSlices = 0;
 	_operativeMode = 0;
+	_imageSource = 0;
 	_wifiBandwidth = 0;
 
 	stringstream ss;
@@ -51,6 +53,7 @@ void StartCTAMsg::serialize(Archive &ar) {
 	ar & _frameHeight;
 	ar & _numSlices;
 	ar & _operativeMode;
+	ar & _imageSource;
 	ar & _wifiBandwidth;
 }
 

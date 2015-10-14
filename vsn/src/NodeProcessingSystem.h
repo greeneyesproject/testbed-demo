@@ -27,21 +27,6 @@ struct DatcParams {
 	float detectionThreshold;
 };
 
-class CameraParameters {
-public:
-	CameraParameters(unsigned char id, std::string file, cv::Size videoSize,
-			bool cameraFlip) {
-		camId = id;
-		filePath = file;
-		size = videoSize;
-		flip = cameraFlip;
-	}
-	unsigned char camId;
-	std::string filePath;
-	cv::Size size;
-	bool flip;
-};
-
 class NodeNetworkSystem;
 
 class NodeProcessingSystem {
@@ -107,8 +92,7 @@ private:
 
 	ImageAcquisition* _imageAcquisition;
 
-	float _acquireImage(cv::Mat& image, const cv::Size& topLeft,
-			const cv::Size& bottomRight, bool fromFile);
+	float _acquireImage(cv::Mat& image, const OperativeMode opMode_, const ImageSource imgSource_);
 
 	cv::Size _imageSlice(const cv::Mat& src, cv::Mat& dst,
 			unsigned char sliceIdx, unsigned char numSlices) const;
@@ -150,8 +134,7 @@ public:
 	static NodeProcessingSystem* _instance;
 
 	static NodeProcessingSystem* getInstance(NodeNetworkSystem*, NodeType const,
-			const CameraParameters& cameraParameters = CameraParameters(0, "",
-					cv::Size(640, 480), false), const bool oneShot = false,
+			const CameraParameters& cameraParameters, const bool oneShot = false,
 			BlackLib::BlackGPIO** gpios = NULL);
 
 	NodeType getNodeType() const {

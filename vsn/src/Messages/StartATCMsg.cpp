@@ -21,7 +21,7 @@ StartATCMsg::StartATCMsg(NetworkNode* const src, NetworkNode* const dst,
 		const uchar transfer_orientation, const ushort num_feat_per_blocks,
 		const cv::Size topLeft, const cv::Size bottomRight,
 		const uchar binShift, const uchar valShift, const uchar numCoops,
-		const OperativeMode opMode, const Bitstream& keypoints, const ushort wifiBandwidth_) :
+		const OperativeMode opMode,const ImageSource imageSource_, const Bitstream& keypoints, const ushort wifiBandwidth_) :
 		Message(src, dst, linkType) {
 
 	_msg_type = MESSAGETYPE_START_ATC;
@@ -46,6 +46,7 @@ StartATCMsg::StartATCMsg(NetworkNode* const src, NetworkNode* const dst,
 	_valShift = valShift;
 	_numCooperators = numCoops;
 	_operativeMode = (uchar) opMode;
+	_imageSource = (uchar) imageSource_;
 	_keypoints = keypoints;
 	_wifiBandwidth = wifiBandwidth_;
 }
@@ -74,6 +75,7 @@ StartATCMsg::StartATCMsg(Header* const header, Bitstream* const bitstream) :
 	_valShift = 0;
 	_numCooperators = 0;
 	_operativeMode = 0;
+	_imageSource = 0;
 	_wifiBandwidth = 0;
 	stringstream ss;
 	ss.rdbuf()->pubsetbuf((char*) bitstream->data(), bitstream->size());
@@ -106,6 +108,7 @@ StartATCMsg::StartATCMsg(NetworkNode* const src, NetworkNode* const dst,
 	_binShift = 0;
 	_valShift = 0;
 	_operativeMode = 0;
+	_imageSource = 0;
 	_wifiBandwidth = 0;
 	stringstream ss;
 	ss.rdbuf()->pubsetbuf((char*) bitstream->data(), bitstream->size());
@@ -135,6 +138,7 @@ void StartATCMsg::serialize(Archive &ar) {
 	ar & _valShift;
 	ar & _numCooperators;
 	ar & _operativeMode;
+	ar & _imageSource;
 	ar & _keypoints;
 	ar & _wifiBandwidth;
 }

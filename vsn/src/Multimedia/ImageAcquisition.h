@@ -11,49 +11,50 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#define GRAB_DELAY 0 //us (5fps)
+#include <TestbedTypes.h>
 
 class ImageAcquisition {
 
 private:
 
-	ImageAcquisition(const int deviceID = 0, const std::string filePath = "",
-			const cv::Size size = cv::Size(640, 480), bool cameraFlip = false);
-
-	void _rebootCamera(cv::Mat frame);
+	ImageAcquisition(const CameraParameters& cameraParams_);
 
 	static ImageAcquisition* _instance;
 
-	cv::VideoCapture _videoCaptureCamera;
-	cv::VideoCapture _videoCaptureFile;
-
-	cv::Mat _lastFrame;
-	mutable boost::mutex _videoCaptureCameraMutex;
+	cv::VideoCapture _videoCaptureLive;
+	cv::VideoCapture _videoCaptureObj;
+	cv::VideoCapture _videoCapturePklot;
 
 	void _grabThread();
 
 	unsigned short _height;
 	unsigned short _width;
 
-	const static uint8_t _grabRep = 7;
-
 	bool _cameraFlip;
 
-	std::string _filePath;
+	int _camId;
+	std::string _fallbackPath;
+	std::string _objPath;
+	std::string _pklotPath;
 
-	int _cameraID;
+	bool _takeFrame(const std::string & path_, cv::VideoCapture & cap_,
+			cv::Mat& picture);
+	bool _takeFrame(const int camId, cv::VideoCapture &cap_, cv::Mat& picture);
+
+	bool _checkFrame(cv::Mat& picture);
+
+	bool _restartCap(cv::VideoCapture &, const std::string &, cv::Mat &);
+	bool _restartCap(cv::VideoCapture &, const int, cv::Mat &);
 
 	static const uchar _DEBUG = 1;
 
 public:
 
-	static ImageAcquisition* getInstance(const int deviceID = 0,
-			const std::string filePath = "",
-			const cv::Size size = cv::Size(640, 480), bool cameraFlip = false);
+	static ImageAcquisition* getInstance(const CameraParameters& cameraParams_);
 
-	bool takeCameraPicture(cv::Mat &picture);
-
-	bool takeFileFrame(cv::Mat& picture);
+	bool takeLiveFrame(cv::Mat& picture);
+	bool takePklotFrame(cv::Mat& picture);
+	bool takeObjFrame(cv::Mat& picture);
 
 };
 

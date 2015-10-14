@@ -18,12 +18,14 @@ private:
 	ushort _frameHeight;
 	uchar _numSlices;
 	uchar _operativeMode;
+	uchar _imageSource;
 	ushort _wifiBandwidth;
 
 public:
 	StartCTAMsg(NetworkNode* const src, NetworkNode* const dst,
 			const LinkType linkType, const uchar qf, const cv::Size size,
-			const uchar num_slices, const OperativeMode opMode, const ushort wifiBandwidth_);
+			const uchar num_slices, const OperativeMode opMode,
+			const ImageSource imageSource_, const ushort wifiBandwidth_);
 
 	StartCTAMsg(Header* const header, Bitstream* const bitstream);
 
@@ -43,6 +45,9 @@ public:
 	}
 	OperativeMode getOperativeMode() const {
 		return (OperativeMode) _operativeMode;
+	}
+	ImageSource getImageSource() const {
+		return (ImageSource) _imageSource;
 	}
 	ushort getWifiBandwidth() const {
 		return _wifiBandwidth;

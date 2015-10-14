@@ -7,165 +7,75 @@ using namespace cv;
 
 ImageAcquisition* ImageAcquisition::_instance = NULL;
 
-ImageAcquisition* ImageAcquisition::getInstance(int deviceID, string filePath,
-		Size size, bool cameraFlip) {
+ImageAcquisition* ImageAcquisition::getInstance(
+		const CameraParameters& cameraParams_) {
 	if (_instance == NULL) {
-		_instance = new ImageAcquisition(deviceID, filePath, size, cameraFlip);
+		_instance = new ImageAcquisition(cameraParams_);
 	}
 	return _instance;
 }
 
-ImageAcquisition::ImageAcquisition(int ID, string filePath, Size size,
-		bool cameraFlip) {
-	_cameraFlip = cameraFlip;
-	_filePath = filePath;
-	_cameraID = ID;
-	if (filePath != "") {
-		_videoCaptureFile = VideoCapture(_filePath);
+ImageAcquisition::ImageAcquisition(const CameraParameters& cameraParams_) {
+
+	_camId = cameraParams_.camId;
+	_objPath = cameraParams_.objPath;
+	_pklotPath = cameraParams_.pklotPath;
+	_fallbackPath = cameraParams_.fallbackPath;
+
+	_height = cameraParams_.size.height;
+	_width = cameraParams_.size.width;
+
+	_cameraFlip = cameraParams_.flip;
+
+	if (_DEBUG) {
+		cout << "ImageAcquisition::ImageAcquisition _camId: " << _camId << endl;
+		cout << "ImageAcquisition::ImageAcquisition _objPath: " << _objPath
+				<< endl;
+		cout << "ImageAcquisition::ImageAcquisition _pklotPath: " << _pklotPath
+				<< endl;
 	}
-	_videoCaptureCamera = VideoCapture(_cameraID);
-	if (_videoCaptureCamera.isOpened()) {  // check if we succeeded
+
+	_videoCaptureObj = VideoCapture(_objPath);
+	if (!_videoCaptureObj.isOpened())
+		_videoCaptureObj = VideoCapture(_fallbackPath);
+
+	_videoCapturePklot = VideoCapture(_pklotPath);
+	if (!_videoCapturePklot.isOpened())
+		_videoCapturePklot = VideoCapture(_fallbackPath);
+
+	_videoCaptureLive = VideoCapture(_camId);
+	if (_videoCaptureLive.isOpened()) {  // check if we succeeded
 
 		if (_DEBUG)
 			cout
 					<< "ImageAcquisition::ImageAcquisition: set camera frame format"
 					<< endl;
-		_videoCaptureCamera.set(CV_CAP_PROP_FOURCC,
+		_videoCaptureLive.set(CV_CAP_PROP_FOURCC,
 				CV_FOURCC('M', 'J', 'P', 'G'));
 
 		if (_DEBUG)
 			cout
 					<< "ImageAcquisition::ImageAcquisition: set camera frame per second"
 					<< endl;
-		_videoCaptureCamera.set(CV_CAP_PROP_FPS, 5);
+		_videoCaptureLive.set(CV_CAP_PROP_FPS, 5);
 
 		if (_DEBUG)
 			cout << "ImageAcquisition::ImageAcquisition: set camera frame width"
 					<< endl;
-		_videoCaptureCamera.set(CV_CAP_PROP_FRAME_WIDTH, size.width);
+		_videoCaptureLive.set(CV_CAP_PROP_FRAME_WIDTH, _width);
 
 		if (_DEBUG)
 			cout
 					<< "ImageAcquisition::ImageAcquisition: set camera frame height"
 					<< endl;
-		_videoCaptureCamera.set(CV_CAP_PROP_FRAME_HEIGHT, size.height);
-
-		_height = size.height;
-		_width = size.width;
-
-		_lastFrame = cv::Mat(_height, _width, CV_8UC3, cv::Scalar::all(0));
+		_videoCaptureLive.set(CV_CAP_PROP_FRAME_HEIGHT, _height);
 
 		boost::thread grabThread(&ImageAcquisition::_grabThread, this);
 	} else {
-		cerr << "ImageAcquisition::ImageAcquisition: Error opening video device"
+		cout << "ImageAcquisition::ImageAcquisition: unable to open _livePath"
 				<< endl;
-		throw "ImageAcquisition::ImageAcquisition: Error opening video device";
+		_videoCaptureLive = VideoCapture(_fallbackPath);
 	}
-}
-
-bool ImageAcquisition::takeCameraPicture(Mat &frame) {
-	try {
-
-		/*for (uchar grabIdx = 0; grabIdx < _grabRep; ++grabIdx) {
-		 _videoCaptureCamera.grab();
-		 }*/
-
-		if (_DEBUG)
-			cout << "ImageAcquisition::takeCameraPicture: retrieve frame"
-					<< endl;
-		//boost::mutex::scoped_lock lock(_videoCaptureCameraMutex);
-		_videoCaptureCamera.retrieve(frame);
-		//lock.unlock();
-
-		/*if (_DEBUG)
-		 cout << "ImageAcquisition::takeCameraPicture: check dimensions"
-		 << endl;
-		 if (_lastFrame.rows != frame.rows || _lastFrame.cols != frame.cols
-		 || _lastFrame.channels() != frame.channels()) {
-		 _rebootCamera(frame);
-		 } else {
-
-		 if (_DEBUG)
-		 cout
-		 << "ImageAcquisition::takeCameraPicture: calculate difference"
-		 << endl;
-		 cv::Mat diff;
-		 cv::absdiff(frame, _lastFrame, diff);
-
-		 if (_DEBUG)
-		 cout << "ImageAcquisition::takeCameraPicture: split channels"
-		 << endl;
-		 cv::Mat channels[3];
-		 cv::split(diff, channels);
-
-		 if (_DEBUG)
-		 cout << "ImageAcquisition::takeCameraPicture: count non zeros "
-		 << endl;
-
-		 if ((cv::countNonZero(channels[0]) + cv::countNonZero(channels[1])
-		 + cv::countNonZero(channels[2])) == 0) {
-		 _rebootCamera(frame);
-		 } else {
-		 if (_DEBUG)
-		 cout
-		 << "ImageAcquisition::takeCameraPicture: new frame correctly retrieved "
-		 << endl;
-		 _lastFrame = frame.clone();
-		 }
-		 }*/
-
-		//_videoCaptureCamera.open(_cameraID);
-		//_videoCaptureCamera.read(frame);
-		//_videoCaptureCamera.release();
-		/*
-
-		 boost::mutex::scoped_lock lock(_frameMutex);
-		 frame = _lastFrame.clone();
-		 lock.unlock();
-		 */
-
-		//_videoCaptureCamera.retrieve(frame);
-		if (frame.empty()) {
-			/* Create a dummy image */
-			frame = cv::Mat::zeros(Size(_width, _height), CV_8UC3);
-		} else {
-
-			/* Resize the image */
-			if (_DEBUG)
-				cout
-						<< "ImageAcquisition::takeCameraPicture: acquired image size: "
-						<< frame.size() << endl;
-			if (_width && _height && frame.size() != Size(_width, _height)) {
-				resize(frame, frame, Size(_width, _height));
-			}
-			if (_cameraFlip) {
-				flip(frame, frame, 1);
-			}
-		}
-
-		return true;
-	} catch (exception &e) {
-		cerr << "ImageAcquisition::takeCameraPicture: " << e.what() << endl;
-		return false;
-	}
-}
-
-/* UNUSED */
-void ImageAcquisition::_rebootCamera(cv::Mat frame) {
-	if (_DEBUG)
-		cout << "ImageAcquisition::_rebootCamera" << endl;
-	boost::mutex::scoped_lock lock(_videoCaptureCameraMutex);
-	if (_DEBUG)
-		cout << "ImageAcquisition::_rebootCamera: release" << endl;
-	_videoCaptureCamera.release();
-	if (_DEBUG)
-		cout << "ImageAcquisition::_rebootCamera: create new VideoCapture"
-				<< endl;
-	_videoCaptureCamera = VideoCapture(_cameraID);
-	if (_DEBUG)
-		cout << "ImageAcquisition::_rebootCamera: read" << endl;
-	_videoCaptureCamera.read(frame);
-	lock.unlock();
 }
 
 void ImageAcquisition::_grabThread() {
@@ -173,21 +83,12 @@ void ImageAcquisition::_grabThread() {
 		while (1) {
 			/* Grab frames periodically */
 
-			/*
-			 _videoCaptureCamera.grab();
-			 boost::mutex::scoped_lock lock(_frameMutex);
-			 _videoCaptureCamera.retrieve(_lastFrame);
-			 lock.unlock();
-			 */
-
 			float time = cv::getTickCount();
-			_videoCaptureCamera.grab();
+			_videoCaptureLive.grab();
 			if (_DEBUG > 1)
 				cout << "ImageAcquisition::_grabThread: grabTime: "
 						<< (cv::getTickCount() - time) / cv::getTickFrequency()
 						<< endl;
-
-			usleep(GRAB_DELAY);
 		}
 	} catch (exception &e) {
 		cerr << "ImageAcquisition: _grabThread: " << e.what() << endl;
@@ -195,36 +96,90 @@ void ImageAcquisition::_grabThread() {
 
 }
 
-bool ImageAcquisition::takeFileFrame(Mat& frame) {
+bool ImageAcquisition::_takeFrame(const int camId, cv::VideoCapture &cap_, cv::Mat& picture) {
+
+	int ret;
 	try {
-
-		if (!_videoCaptureFile.isOpened()) {
-			_videoCaptureFile.open(_filePath);
-			frame = cv::Mat::zeros(Size(_width, _height), CV_8UC3);
-			return false;
-		}
-
-		bool ret = _videoCaptureFile.read(frame);
-		if (!ret) {
-			_videoCaptureFile.release();
-			_videoCaptureFile.open(_filePath);
-			//_videoCaptureFile.set(CV_CAP_PROP_POS_FRAMES, 0);
-			_videoCaptureFile.read(frame);
-		}
-
-		if (frame.empty()) {
-			/* Create a dummy image */
-			frame = cv::Mat::zeros(Size(_width, _height), CV_8UC3);
-		} else {
-			/* Resize the image */
-			if (_width && _height && frame.size() != Size(_width, _height)) {
-				resize(frame, frame, Size(_width, _height));
-			}
-		}
-
+		ret = cap_.retrieve(picture);
+		if (!ret)
+			ret = _restartCap(cap_, camId, picture);
+		if (_DEBUG)
+			cout << "ImageAcquisition::_takeFrame: retrieve: " << ret << endl;
+		_checkFrame(picture);
 		return true;
 	} catch (exception &e) {
-		cerr << "ImageAcquisition::takeFileFrame: " << e.what() << endl;
+		cerr << "ImageAcquisition::_takeFrame: " << e.what() << endl;
 		return false;
 	}
+}
+
+bool ImageAcquisition::_takeFrame(const std::string & path_, cv::VideoCapture & cap_,
+		cv::Mat& picture) {
+
+	int ret;
+	try {
+		ret = cap_.read(picture);
+		if (!ret)
+			ret = _restartCap(cap_, path_, picture);
+		if (_DEBUG)
+			cout << "ImageAcquisition::_takeFrame: retrieve: " << ret << endl;
+		_checkFrame(picture);
+		return true;
+	} catch (exception &e) {
+		cerr << "ImageAcquisition::_takeFrame: " << e.what() << endl;
+		return false;
+	}
+}
+
+bool ImageAcquisition::_checkFrame(cv::Mat & picture) {
+	if (picture.empty()) {
+		if (_DEBUG)
+			cout << "ImageAcquisition::_checkFrame: creating a dummy image: "
+					<< endl;
+		/* Create a dummy image */
+		picture = cv::Mat::zeros(Size(_width, _height), CV_8UC3);
+		return false;
+	} else {
+
+		/* Resize the image */
+		if (_DEBUG)
+			cout << "ImageAcquisition::_checkFrame: acquired image size: "
+					<< picture.size() << endl;
+		if (_width && _height && picture.size() != Size(_width, _height)) {
+			resize(picture, picture, Size(_width, _height));
+		}
+		if (_cameraFlip) {
+			flip(picture, picture, 1);
+		}
+		return true;
+	}
+}
+
+bool ImageAcquisition::_restartCap(cv::VideoCapture & cap,
+		const std::string & path, cv::Mat & picture) {
+	if (_DEBUG)
+		cout << "ImageAcquisition::_restartCap: release and open " << endl;
+	cap.release();
+	cap.open(path);
+	return cap.read(picture);
+}
+bool ImageAcquisition::_restartCap(cv::VideoCapture & cap, const int camId,
+		cv::Mat & picture) {
+	if (_DEBUG)
+		cout << "ImageAcquisition::_restartCap: release and open " << endl;
+	cap.release();
+	cap.open(camId);
+	return cap.read(picture);
+}
+
+bool ImageAcquisition::takeLiveFrame(Mat &frame) {
+	return _takeFrame(_camId, _videoCaptureLive, frame);
+}
+
+bool ImageAcquisition::takeObjFrame(Mat &frame) {
+	return _takeFrame(_objPath, _videoCaptureObj, frame);
+}
+
+bool ImageAcquisition::takePklotFrame(Mat &frame) {
+	return _takeFrame(_pklotPath, _videoCapturePklot, frame);
 }

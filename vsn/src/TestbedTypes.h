@@ -8,6 +8,9 @@
 #ifndef SRC_TESTBEDTYPES_H_
 #define SRC_TESTBEDTYPES_H_
 
+#include<string>
+#include<opencv2/core/core.hpp>
+
 enum NodeType {
 	NODETYPE_UNDEF,
 	NODETYPE_GUI,
@@ -55,6 +58,30 @@ enum DescriptorType {
 enum OperativeMode {
 	OPERATIVEMODE_OBJECT,
 	OPERATIVEMODE_PKLOT
+};
+
+enum ImageSource {
+	IMAGESOURCE_LIVE,
+	IMAGESOURCE_REC
+};
+
+class CameraParameters {
+public:
+	CameraParameters(int cameraId_, std::string objPath_,
+			std::string pklotPath_,std::string fallbackPath_, cv::Size videoSize, bool cameraFlip) {
+		camId = cameraId_;
+		objPath = objPath_;
+		pklotPath = pklotPath_;
+		fallbackPath = fallbackPath_;
+		size = videoSize;
+		flip = cameraFlip;
+	}
+	int camId;
+	std::string objPath;
+	std::string pklotPath;
+	std::string fallbackPath;
+	cv::Size size;
+	bool flip;
 };
 
 #endif /* SRC_TESTBEDTYPES_H_ */

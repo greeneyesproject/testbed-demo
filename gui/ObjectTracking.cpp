@@ -131,7 +131,7 @@ int ObjectTracking::trackObject(int camIdx, int opMode){
 
     Camera * cur_cam = (*(cameras()))[camIdx];
 
-    if (((OperativeMode)opMode) != OPERATIVEMODE_OBJECT){
+    if ((((OperativeMode)opMode) != OPERATIVEMODE_OBJECT) || (cur_cam->getGoodDescriptors().cols != 32)){
         return 0;
     }
 
@@ -182,7 +182,6 @@ int ObjectTracking::trackObject(int camIdx, int opMode){
         }
     }
     //***NBS***//
-
 
     descr_out.release();
     keyp_out.clear();

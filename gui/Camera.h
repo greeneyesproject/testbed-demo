@@ -115,6 +115,9 @@ public:
     OperativeMode getOperativeMode(){return _operativeMode;}
     void setOperativeMode(OperativeMode);
 
+    ImageSource getImageSource(){return _imageSource;}
+    void setImageSource(ImageSource imgSrc_){ _imageSource = imgSrc_;}
+
     //***NBS***/
     bool getNbsReady() {return _nbsReady;}
     void setNbsReady(bool nbsReady) {_nbsReady = nbsReady;}
@@ -380,6 +383,7 @@ private:
     std::vector<cv::Point2f> _track_points;
 
     OperativeMode _operativeMode;
+    ImageSource _imageSource;
 
     cv::Mat _pklotPredictionsHistory;
 

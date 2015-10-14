@@ -444,7 +444,8 @@ bool GuiProcessingSystem::sendStartCTA(Camera* camera){
                                        NetworkNode::getCameraById(camera->getId()),
                                        camera->getLinkType(),
                                        camera->cta_param.quality_factor,
-                                       cv::Size(FRAME_W,FRAME_H), camera->cta_param.num_slices,camera->getOperativeMode(),
+                                       cv::Size(FRAME_W,FRAME_H), camera->cta_param.num_slices,
+                                       camera->getOperativeMode(),camera->getImageSource(),
                                        camera->getWifiBw()
                                        );
     return sendStart(camera,msg);
@@ -458,6 +459,8 @@ bool GuiProcessingSystem::sendStartATC(Camera* camera){
     uchar numCoops = camera->getDatc() ? camera->getNumCoop() : 0;
 
     ushort wifiBw = camera->getWifiBw();
+
+    ImageSource imageSource = camera->getImageSource();
 
     switch (camera->getOperativeMode()){
     case OPERATIVEMODE_OBJECT:{
@@ -483,6 +486,7 @@ bool GuiProcessingSystem::sendStartATC(Camera* camera){
                               0, //valshift
                               numCoops, //Num cooperators
                               OPERATIVEMODE_OBJECT,
+                              imageSource,
                               emptyBitstream,
                               wifiBw
                               );
@@ -510,6 +514,7 @@ bool GuiProcessingSystem::sendStartATC(Camera* camera){
                               camera->atc_param.valShift,
                               numCoops, //Num cooperators
                               OPERATIVEMODE_PKLOT,
+                              imageSource,
                               camera->getPKLotKptsBitstream(),
                               camera->getWifiBw()
                               );
@@ -575,6 +580,8 @@ bool GuiProcessingSystem::sendStartATCNBS(Camera* camera){
 
     uchar numCoops = leftCamera->getDatc() ? leftCamera->getNumCoop() : 0;
 
+    ImageSource imageSource = camera->getImageSource();
+
     Bitstream emptyBitstream;
 
     //start both cameras in nbs mode
@@ -599,6 +606,7 @@ bool GuiProcessingSystem::sendStartATCNBS(Camera* camera){
                                               leftCamera->atc_param.valShift,
                                               numCoops, //Num cooperators
                                               OPERATIVEMODE_OBJECT,
+                                              imageSource,
                                               emptyBitstream, //pklot kpts bitstream
                                               leftCamera->getWifiBw()
                                               );
@@ -625,6 +633,7 @@ bool GuiProcessingSystem::sendStartATCNBS(Camera* camera){
                                               rightCamera->atc_param.valShift,
                                               numCoops, //Num cooperators
                                               OPERATIVEMODE_OBJECT,
+                                              imageSource,
                                               emptyBitstream, //pklot kpts bitstream
                                               rightCamera->getWifiBw()
                                               );

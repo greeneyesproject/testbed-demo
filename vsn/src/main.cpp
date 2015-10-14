@@ -67,7 +67,11 @@ int main(int argc, char ** argv) {
 	vector<uint16_t> remotePorts;
 	vector<uint16_t> localPorts;
 
-	uint8_t nodeId = 0, cameraId = 0;
+	uint8_t nodeId = 0;
+	int cameraId = 0;
+	string objPath = "";
+	string pklotPath = "";
+	string fallbackPath = "";
 	bool cameraFlip = false;
 	bool nodeIdFound = false;
 
@@ -110,9 +114,21 @@ int main(int argc, char ** argv) {
 				"Telos device path", false, "null", "string");
 		cmd.add(telosDevPathArg);
 
-		TCLAP::ValueArg<int> cameraIdArg("", "camera", "Camera id", false, 0,
-				"int");
+		TCLAP::ValueArg<int> cameraIdArg("", "camera-id", "Camera device id",
+				false, 0, "int");
 		cmd.add(cameraIdArg);
+
+		TCLAP::ValueArg<string> objPathArg("", "obj-path",
+				"Recorded objects file path", false, "", "string");
+		cmd.add(objPathArg);
+
+		TCLAP::ValueArg<string> pklotPathArg("", "pklot-path",
+				"Recorded pklot file path", false, "", "string");
+		cmd.add(pklotPathArg);
+
+		TCLAP::ValueArg<string> fallbackPathArg("", "fallback-path",
+				"Recorded fallback file path", false, "", "string");
+		cmd.add(fallbackPathArg);
 
 		TCLAP::SwitchArg cameraFlipArg("", "camera-flip",
 				"Camera horizontal flip", false);
@@ -169,6 +185,9 @@ int main(int argc, char ** argv) {
 		}
 		nodeId = nodeIdArg.getValue();
 		cameraId = cameraIdArg.getValue();
+		objPath = objPathArg.getValue();
+		pklotPath = pklotPathArg.getValue();
+		fallbackPath = fallbackPathArg.getValue();
 		telosDevPath = telosDevPathArg.getValue();
 		networkConfigPath = networkConfigArg.getValue();
 		cameraFlip = cameraFlipArg.getValue();
@@ -332,24 +351,34 @@ int main(int argc, char ** argv) {
 	/* Create the io_service */
 	boost::asio::io_service io_service;
 
-	/* Video stream */
-	stringstream ss;
-	if (oneShot) {
-		ss << "oneshot/oneshot_%02d.jpg";
-	} else {
-		ss << "pklot/camera" << (int) nodeId << "_%04d.jpg";
-	}
-
 	/* Create the NodeNetworkSystem. Needs to be instantiated before the NodeProcessingSystem */
 	NodeNetworkSystem* nodeNetworkSystem = NodeNetworkSystem::getInstance(
-			io_service, remoteIps,
-			remotePorts, telosDevPath, gpios);
+			io_service, remoteIps, remotePorts, telosDevPath, gpios);
+
+	/* Determine camera parameters */
+	stringstream ss;
+	if (objPath.length() == 0) {
+		ss.str("");
+		ss << "obj/camera" << (int) nodeId << "_%04d.jpg";
+		objPath = ss.str();
+	}
+	if (pklotPath.length() == 0) {
+		ss.str("");
+		ss << "pklot/camera" << (int) nodeId << "_%04d.jpg";
+		pklotPath = ss.str();
+	}
+	if (fallbackPath.length() == 0) {
+		ss.str("");
+		ss << "oneshot/test_%02d.jpg";
+		fallbackPath = ss.str();
+	}
+	CameraParameters camParms(cameraId, objPath, pklotPath, fallbackPath,
+			cv::Size(640, 480), cameraFlip);
 
 	/* Create the NodeProcessingSystem */
 	NodeProcessingSystem* nodeProcessingSystem =
-			NodeProcessingSystem::getInstance(nodeNetworkSystem,nodeType,
-					CameraParameters(cameraId, ss.str(), cv::Size(640, 480),
-							cameraFlip), oneShot, gpios);
+			NodeProcessingSystem::getInstance(nodeNetworkSystem, nodeType,
+					camParms, oneShot, gpios);
 
 	gpios[0]->setValue(BlackLib::low);  //Reset loading pin
 
@@ -381,24 +410,26 @@ int main(int argc, char ** argv) {
 					true, //Scale transfer
 					true, //Orientation transfer
 					atcNumfeat, //Number of features per block
-					cv::Size(0,0), //topLeft
-					cv::Size(640,480), //bottomRight
+					cv::Size(0, 0), //topLeft
+					cv::Size(640, 480), //bottomRight
 					0, //binShift
 					0, //valShift
 					0, //numcoops
-					OPERATIVEMODE_OBJECT,
-					emptyBitstream, //kpts bitstream
+					OPERATIVEMODE_OBJECT, IMAGESOURCE_LIVE, emptyBitstream, //kpts bitstream
 					80 //wifi bw
 					);
-		}
-		else if (mode == "atc-pklot") {
+		} else if (mode == "atc-pklot") {
 
-			cv::Mat atcOneShotKeypoints = cv::imread("pklot/camera_12_kptsBitstream.bmp",cv::IMREAD_UNCHANGED);
-			Bitstream atcOneShotKeypointsBitstream(atcOneShotKeypoints.datastart,atcOneShotKeypoints.dataend);
+			cv::Mat atcOneShotKeypoints = cv::imread(
+					"pklot/camera_12_kptsBitstream.bmp", cv::IMREAD_UNCHANGED);
+			Bitstream atcOneShotKeypointsBitstream(
+					atcOneShotKeypoints.datastart, atcOneShotKeypoints.dataend);
 			fakeStart = (Message*) new StartATCMsg(NetworkNode::getSink(),
 					NetworkNode::getMyself(), fakeStartLinkType,
-					DETECTORTYPE_NONE, 0, //Detection Threshold (ignore)
-					DESCRIPTORTYPE_HIST, 0, //Description Length (ignored)
+					DETECTORTYPE_NONE,
+					0, //Detection Threshold (ignore)
+					DESCRIPTORTYPE_HIST,
+					0, //Description Length (ignored)
 					0, //Number of features (ignored)
 					true, //Rotation invariance
 					true, //Keypoints encoding
@@ -409,20 +440,17 @@ int main(int argc, char ** argv) {
 					200, //Number of features per block
 					cv::Size(0, 0), //top left
 					cv::Size(640, 480), //bottom right
-					atcBinShift,
-					atcValShift,
+					atcBinShift, atcValShift,
 					0, //Num coops
-					OPERATIVEMODE_PKLOT,
-					atcOneShotKeypointsBitstream,
-					80 //kpbs wifibw
+					OPERATIVEMODE_PKLOT, IMAGESOURCE_REC,
+					atcOneShotKeypointsBitstream, 80 //kpbs wifibw
 					);
-		}else {
+		} else {
 			fakeStart = (Message*) new StartCTAMsg(NetworkNode::getSink(),
 					NetworkNode::getMyself(), fakeStartLinkType, ctaQf, // Quality factor
 					cv::Size(640, 480), //Frame size
 					ctaSlices, // Number of slices
-					OPERATIVEMODE_OBJECT,
-					80 //kpbs wifibw
+					OPERATIVEMODE_OBJECT, IMAGESOURCE_LIVE, 80 //kpbs wifibw
 					);
 		}
 		nodeProcessingSystem->queueMessage(fakeStart);

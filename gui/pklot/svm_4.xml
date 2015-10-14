@@ -3,7 +3,7 @@
 <my_svm type_id="opencv-ml-svm">
   <svm_type>C_SVC</svm_type>
   <kernel><type>LINEAR</type></kernel>
-  <C>1.</C>
+  <C>100000.</C>
   <term_criteria><epsilon>1.0000000474974513e-03</epsilon>
     <iterations>100000</iterations></term_criteria>
   <var_all>12</var_all>
@@ -18,13 +18,13 @@
   <sv_total>1</sv_total>
   <support_vectors>
     <_>
-      5.23748970e+00 4.64248180e+00 4.62264681e+00 4.80938292e+00
-      1.50340719e+01 -2.26388912e+01 6.33373165e+00 2.34483212e-01
-      -1.47086155e+00 -5.99886608e+00 1.05863829e+01 -2.13920536e+01</_></support_vectors>
+      9.00184097e+01 6.08107491e+01 5.15562439e+01 3.97187080e+01
+      1.15828400e+02 1.45502796e+01 5.90022621e+01 5.95097275e+01
+      -1.44371796e+02 -6.45028763e+01 -6.06775513e+01 -2.21435074e+02</_></support_vectors>
   <decision_functions>
     <_>
       <sv_count>1</sv_count>
-      <rho>3.4846455034958312e+00</rho>
+      <rho>5.7361574401693524e+01</rho>
       <alpha>
         1.</alpha>
       <index>

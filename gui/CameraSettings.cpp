@@ -58,6 +58,12 @@ CameraSettings::CameraSettings(QWidget *parent) :
             this,
             SLOT(operativeModeToggledSlot(QAbstractButton*)));
 
+    /* Image source */
+    connect(ui->buttonGroup_imageSource,
+            SIGNAL(buttonClicked(QAbstractButton*)),
+            this,
+            SLOT(imageSourceToggledSlot(QAbstractButton*)));
+
     connect(ui->buttonGroup_ATC_CTA, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(atcCtaRadioSwitchSlot(QAbstractButton*)));
 
     connect(ui->spinBox_ATCdetThNumBin, SIGNAL(valueChanged(int)), this, SLOT(detectionThresholdModifiedSlot(int)));
@@ -306,6 +312,13 @@ void CameraSettings::setSelectedCameraParameters(){
     ui->radioButton_objects->setChecked(_selectedCamera->getOperativeMode()==OPERATIVEMODE_OBJECT);
     ui->radioButton_parkingLot->setChecked(_selectedCamera->getOperativeMode()==OPERATIVEMODE_PKLOT);
     ui->buttonGroup_operativeMode->blockSignals(false);
+
+    /* Image source */
+    ui->buttonGroup_imageSource->blockSignals(true);
+    ui->radioButton_live->setChecked(_selectedCamera->getImageSource()==IMAGESOURCE_LIVE);
+    ui->radioButton_playback->setChecked(_selectedCamera->getImageSource()==IMAGESOURCE_REC);
+    ui->buttonGroup_imageSource->blockSignals(false);
+
     /* Detection threshold */
     ui->horizontalSlider_ATCdetThNumBin->blockSignals(true);
     ui->spinBox_ATCdetThNumBin->blockSignals(true);
@@ -782,6 +795,25 @@ void CameraSettings::operativeModeToggledSlot(QAbstractButton* button){
         ui->radioButton_objects->setChecked(false);
         ui->radioButton_parkingLot->setChecked(true);
         _selectedCamera->setOperativeMode(OPERATIVEMODE_PKLOT);
+    }
+
+    setSelectedCameraParameters();
+}
+
+/**
+ * @brief CameraSettings::imageSourceToggledSlot
+ * Called on image source radio button toggle
+ * @param button
+ */
+void CameraSettings::imageSourceToggledSlot(QAbstractButton* button){
+    if (button == ui->radioButton_live){
+        ui->radioButton_live->setChecked(true);
+        ui->radioButton_playback->setChecked(false);
+        _selectedCamera->setImageSource(IMAGESOURCE_LIVE);
+    }else if(button == ui->radioButton_playback){
+        ui->radioButton_live->setChecked(false);
+        ui->radioButton_playback->setChecked(true);
+        _selectedCamera->setImageSource(IMAGESOURCE_REC);
     }
 
     setSelectedCameraParameters();

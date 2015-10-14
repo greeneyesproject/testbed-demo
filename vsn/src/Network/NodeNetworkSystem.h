@@ -103,6 +103,9 @@ private:
 	/* Interface used to communicate with the sink */
 	string _linkInterface;
 
+	/* True if localhost path to the sink */
+	bool _lo;
+
 };
 
 #endif

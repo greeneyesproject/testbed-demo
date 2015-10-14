@@ -25,9 +25,9 @@
 
 NodeProcessingSystem* NodeProcessingSystem::_instance = NULL;
 
-NodeProcessingSystem* NodeProcessingSystem::getInstance(NodeNetworkSystem* nns_, const NodeType nodeType,
-		const CameraParameters& cameraParameters, const bool oneShot,
-		BlackLib::BlackGPIO** gpios) {
+NodeProcessingSystem* NodeProcessingSystem::getInstance(NodeNetworkSystem* nns_,
+		const NodeType nodeType, const CameraParameters& cameraParameters,
+		const bool oneShot, BlackLib::BlackGPIO** gpios) {
 	if (_instance == NULL) {
 		_instance = new NodeProcessingSystem(nns_, nodeType, cameraParameters,
 				oneShot, gpios);
@@ -36,9 +36,9 @@ NodeProcessingSystem* NodeProcessingSystem::getInstance(NodeNetworkSystem* nns_,
 
 }
 
-NodeProcessingSystem::NodeProcessingSystem(NodeNetworkSystem* nns_, const NodeType nodeType,
-		const CameraParameters& cameraParameters, const bool oneShot,
-		BlackLib::BlackGPIO** gpios) :
+NodeProcessingSystem::NodeProcessingSystem(NodeNetworkSystem* nns_,
+		const NodeType nodeType, const CameraParameters& cameraParameters,
+		const bool oneShot, BlackLib::BlackGPIO** gpios) :
 		_processingQueue(_waitPeriod, 1), _serviceQueue(_waitPeriod) {
 
 	_gpios = gpios;
@@ -248,9 +248,8 @@ void NodeProcessingSystem::_cameraProcessing(Message* msg) {
 		_gpios[1]->setValue(BlackLib::high); //Set acquisition pin
 
 		cv::Mat image;
-		float acquisitionTime = _acquireImage(image, cv::Size(0, 0),
-				cv::Size(message->getFrameWidth(), message->getFrameHeight()),
-				message->getOperativeMode() == OPERATIVEMODE_PKLOT || _oneShot);
+		float acquisitionTime = _acquireImage(image,
+				message->getOperativeMode(), message->getImageSource());
 
 		if (_DEBUG > 1)
 			cout << "NodeProcessingSystem::_cameraProcessing: acquisitionTime: "
@@ -334,9 +333,8 @@ void NodeProcessingSystem::_cameraProcessing(Message* msg) {
 
 		_gpios[1]->setValue(BlackLib::high); //Set acquisition pin
 		cv::Mat image;
-		float acquisitionTime = _acquireImage(image, message->getTopLeft(),
-				message->getBottomRight(),
-				message->getOperativeMode() == OPERATIVEMODE_PKLOT || _oneShot);
+		float acquisitionTime = _acquireImage(image,
+				message->getOperativeMode(), message->getImageSource());
 		if (_DEBUG > 1)
 			cout << "NodeProcessingSystem::_cameraProcessing: acquisitionTime: "
 					<< acquisitionTime << endl;
@@ -783,28 +781,46 @@ void NodeProcessingSystem::_cooperatorService(Message* msg) {
 /* --------------------- PROCESSING METHODS ----------------------- */
 
 float NodeProcessingSystem::_acquireImage(cv::Mat& image,
-		const cv::Size& topLeft, const cv::Size& bottomRight,
-		const bool fromFile) {
+		const OperativeMode opMode_, const ImageSource imgSource_) {
 	float time = cv::getTickCount();
 
-	if (fromFile) {
-		_imageAcquisition->takeFileFrame(image);
-	} else {
-		_imageAcquisition->takeCameraPicture(image);
+	switch (imgSource_) {
+	case IMAGESOURCE_LIVE: {
+		_imageAcquisition->takeLiveFrame(image);
+		break;
+	}
+	case IMAGESOURCE_REC: {
+		switch (opMode_) {
+		case OPERATIVEMODE_OBJECT: {
+			_imageAcquisition->takeObjFrame(image);
+			break;
+		}
+		case OPERATIVEMODE_PKLOT: {
+			_imageAcquisition->takePklotFrame(image);
+			break;
+		}
+
+		default:
+			cerr
+					<< "NodeProcessingSystem::_acquireImage: opMode_ case not managed:"
+					<< opMode_ << endl;
+		}
+
+	}
+	default:
+		cerr
+				<< "NodeProcessingSystem::_acquireImage: imgSource_ case not managed:"
+				<< imgSource_ << endl;
 	}
 
-	image = image.rowRange(topLeft.height, bottomRight.height);
-	image = image.colRange(topLeft.width, bottomRight.width);
-
 	if (_DEBUG > 1) {
-		cout << "NodeProcessingSystem::_acquireGreyscaleImage: image.rows: "
+		cout << "NodeProcessingSystem::_acquireImage: image.rows: "
 				<< image.rows << endl;
-		cout << "NodeProcessingSystem::_acquireGreyscaleImage: image.cols: "
+		cout << "NodeProcessingSystem::_acquireImage: image.cols: "
 				<< image.cols << endl;
-		cout
-				<< "NodeProcessingSystem::_acquireGreyscaleImage: image.channels(): "
+		cout << "NodeProcessingSystem::_acquireImage: image.channels(): "
 				<< image.channels() << endl;
-		cout << "NodeProcessingSystem::_acquireGreyscaleImage: image.type(): "
+		cout << "NodeProcessingSystem::_acquireImage: image.type(): "
 				<< image.type() << endl;
 	}
 	return (cv::getTickCount() - time) / cv::getTickFrequency();
@@ -887,14 +903,15 @@ float NodeProcessingSystem::_encodeFeatures(const cv::Mat& features,
 		cout << "NodeProcessingSystem::_encodeFeatures: encoding " << endl;
 
 	if (_DEBUG > 1)
-		cout << "NodeProcessingSystem::_encodeFeatures: features: " << features.row(0).colRange(0,min(20,features.cols)) << endl;
+		cout << "NodeProcessingSystem::_encodeFeatures: features: "
+				<< features.row(0).colRange(0, min(20, features.cols)) << endl;
 
 	_encoder->encodeDescriptors(parms, encoderType, features, bitstream);
 
-	if (_DEBUG > 1){
+	if (_DEBUG > 1) {
 		cout << "NodeProcessingSystem::_encodeFeatures: bitstream: ";
-		for (int i = 0; i < min(20,(int)bitstream.size()); ++i){
-			cout << (int)bitstream[i] << " ";
+		for (int i = 0; i < min(20, (int) bitstream.size()); ++i) {
+			cout << (int) bitstream[i] << " ";
 		}
 		cout << endl;
 	}
@@ -996,9 +1013,7 @@ void NodeProcessingSystem::_initCamera(
 		const CameraParameters& cameraParameters) {
 
 	/* Initialize camera */
-	_imageAcquisition = ImageAcquisition::getInstance(cameraParameters.camId,
-			cameraParameters.filePath, cameraParameters.size,
-			cameraParameters.flip);
+	_imageAcquisition = ImageAcquisition::getInstance(cameraParameters);
 	/* Initialize extractor, encoder */
 	const BRISK_detParams briskDetPrms(60, 4);
 	const BRISK_descParams briskDescPrms;

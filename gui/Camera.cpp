@@ -24,6 +24,7 @@ Camera::Camera(uint id, uint am_address, string ip_address, NetworkItem* network
     _linkType=LINKTYPE_TCP;
 
     _operativeMode = OPERATIVEMODE_OBJECT;
+    _imageSource = IMAGESOURCE_LIVE;
     _currentMode = CAMERA_MODE_CTA;
     _detThres = 60;
     _maxF = 50;
