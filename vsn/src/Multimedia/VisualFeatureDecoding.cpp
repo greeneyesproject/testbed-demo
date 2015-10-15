@@ -116,7 +116,7 @@ bool VisualFeatureDecoding::decodeBinaryDescriptors(
     bool retval;
 
     cout << "bitstream: ";
-    for (int i = 0; i < 20; ++i){
+    for (int i = 0; i < min(20,(int)bitstream.size()); ++i){
         cout << (int)bitstream[i] << " ";
     }
     cout << endl;

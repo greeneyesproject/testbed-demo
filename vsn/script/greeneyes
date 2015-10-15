@@ -16,12 +16,12 @@ case "$1" in
     echo "Starting GreenEyes VSN "
 		cd /opt/greeneyes-vsn
 		
-		case "$(pidof greeneyes-vsn | wc -w)" in
-		1) echo "GreenEyes VSN already running. Please run 'sudo service greeneyes restart'"
-
-			exit 1
-			;;
-		esac
+		PID=`pidof greeneyes-vsn`
+        if [ -n "$PID" ]
+        then
+            echo "GreenEyes VSN already running."
+            exit 1
+		fi
 
 		if [ -f log.txt ]
 		then mv log.txt log.prev.txt
@@ -54,17 +54,18 @@ case "$1" in
   stop)
     echo "Stopping GreenEyes VSN"
     
-    case "$(pidof greeneyes-vsn | wc -w)" in
-	0) echo "GreenEyes VSN already stopped."
-	exit 0;
-	;;
-    esac
-    pkill -quit greeneyes-vsn
-    sleep 5
+    PID=`pidof greeneyes-vsn`
 
+    if [ -z "$PID" ]
+    then
+        echo "GreenEyes VSN already stopped."
+    else
+	    pkill -quit greeneyes-vsn
+	    while ps -p $PID  > /dev/null; do sleep 1; done;
+    fi
     ;;
   restart)
-    echo "Restarting GreenEyes VSN"
+    #echo "Restarting GreenEyes VSN"
 	service greeneyes stop
 	service greeneyes start
 
