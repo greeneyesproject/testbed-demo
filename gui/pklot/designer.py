@@ -20,9 +20,8 @@ LINE_THICK_CANDIDATE = 2
 LINE_COLOR = (0,192,0)
 LINE_THICK = 2
 
-windowName = "PKLot"
-parkingName = "camera12"
-imgPath = "camera12.jpg"
+windowName = "parking"
+parkingName = "deib"
 
 def point_inside_polygon(point,poly):
 
@@ -137,11 +136,12 @@ def rectify(quadr):
 
 def redrawImg(data):
     img = data['originalImg'].copy()
-    for rect in data['rectangles']:
+    for rect,rot_rect in zip(data['rectangles'],data['rotatedRectangles']):
         cv2.line(img,rect[0],rect[1],LINE_COLOR,LINE_THICK)
         cv2.line(img,rect[1],rect[2],LINE_COLOR,LINE_THICK)
         cv2.line(img,rect[2],rect[3],LINE_COLOR,LINE_THICK)
         cv2.line(img,rect[3],rect[0],LINE_COLOR,LINE_THICK)
+        cv2.circle(img,tuple(rot_rect[0]),np.floor(0.5*min(rot_rect[2:4])).astype(np.int),LINE_COLOR,LINE_THICK);
     cv2.imshow(windowName,img)
     data['currentImg'] = img
 
@@ -165,7 +165,7 @@ def onMouse(event,x,y,flags,data):
             elif numPreviousPoints == 3:
                 # Close the rectangle if this is the fourth point ---
                 newRect = data['candRect'] + [point]
-                newRect,newRotatedRect = rectify(newRect)
+                _,newRotatedRect = rectify(newRect)
                 data['rectangles'] += [newRect]
                 data['rotatedRectangles'] += [newRotatedRect]
                 redrawImg(data);
@@ -195,7 +195,8 @@ def main():
     print('| Press "q" to quit'+' '*27+'|')
     print('+'+'-'*45+'+')
     
-    xmlPath = parkingName+".xml"
+    imgPath = "camera11.jpg"
+    xmlPath = "camera11.xml"
     
     img = cv2.imread(imgPath)
     

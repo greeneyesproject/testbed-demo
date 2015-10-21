@@ -130,8 +130,8 @@ bool VisualFeatureDecoding::decodeBinaryDescriptors(
         retval = false;
 	}
 
-
-    cout << "features: " << features.row(0).colRange(0,min(10,features.cols)) << endl;
+    if (features.total())
+        cout << "features: " << features.row(0).colRange(0,min(10,features.cols)) << endl;
 
     return retval;
 }
