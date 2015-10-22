@@ -50,6 +50,8 @@ void GuiProcessingSystem::processDataCTAMsg(Camera *camera, DataCTAMsg* msg){
     /* CV_8UC1 */
     cv::Mat slice = imdecode(*(msg->getData()),CV_LOAD_IMAGE_UNCHANGED);
 
+    camera->cta_param.framePayloadSize += msg->getBitstreamSize();
+
     int R = slice.rows;
     int C = slice.cols;
     cv::Point top_left,bottom_right;
@@ -59,7 +61,11 @@ void GuiProcessingSystem::processDataCTAMsg(Camera *camera, DataCTAMsg* msg){
     bottom_right.y = top_left.y + R;
 
     camera->setTempProcTime(camera->getTempProcTime() + msg->getEncodingTime());
-    camera->setTempTxTime(camera->getTempTxTime() + msg->getTxTime());
+    if (msg->getLinkType()==LINKTYPE_TELOS){
+        camera->setTempTxTime(camera->getTempTxTime() + msg->getTxTime());
+    }else{
+        camera->setTempTxTime(msg->getTxTime());
+    }
 
     if(msg->getSliceNumber()==0 || msg->getFrameId()!=_lastFrameId->at(camera->getGuiIdx())){
         //if (camera->getLinkType()==LINKTYPE_TELOS){
@@ -78,6 +84,11 @@ void GuiProcessingSystem::processDataCTAMsg(Camera *camera, DataCTAMsg* msg){
     cout << "GuiProcessingSystem::processDataCTAMsg: slice" << msg->getSliceNumber()+1 << "/" << camera->cta_param.num_slices << endl;
     if(msg->getSliceNumber() == camera->cta_param.num_slices-1){
 
+        float bandwidth = (double)( camera->cta_param.framePayloadSize*8.0/1024.0 )/(((DataCTAMsg*)msg)->getTxTime());
+        qDebug() << "GuiProcessingSystem::processDataCTAMsg: camera->cta_param.framePayloadSize: " << camera->cta_param.framePayloadSize << endl;
+        qDebug() << "GuiProcessingSystem::processDataCTAMsg: ((DataCTAMsg*)msg)->getTxTime(): " << ((DataCTAMsg*)msg)->getTxTime() << endl;
+        qDebug() << "GuiProcessingSystem::processDataCTAMsg: bandwidth: " << bandwidth << endl;
+        emit camera->curBandwidthChangedSignal(camera->getGuiIdx(), bandwidth);
 
         double energy=0;
         camera->setProcessingEnergy(camera->getTempProcTime() * CPU_POWER_BBB);    // switch to energy
@@ -197,12 +208,16 @@ void GuiProcessingSystem::processDataATCMsg(Camera* camera, DataATCMsg* msg){
                 msg->getKptsEncodingTime() +
                 msg->getFeatEncodingTime());
 
-    camera->setTempTxTime(
-                camera->getTempTxTime() +
-                msg->getTxTime());
+    if (msg->getLinkType()==LINKTYPE_TELOS){
+        camera->setTempTxTime(camera->getTempTxTime() + msg->getTxTime());
+    }else{
+        camera->setTempTxTime(msg->getTxTime());
+    }
 
     cv::Mat features;
     vector<cv::KeyPoint> keypoints;
+
+    camera->atc_param.framePayloadSize += msg->getBitstreamSize();
 
     /* This copy is necessary since the ac_encoder doesn't accept const vector<uchar> */
     const vector<uchar>* kp_bitstream = msg->getKeypointsData();
@@ -312,6 +327,14 @@ void GuiProcessingSystem::processDataATCMsg(Camera* camera, DataATCMsg* msg){
 
 
         if(msg->getBlockNumber() == msg->getNumBlocks()-1){
+
+            float bandwidth = (double)( camera->atc_param.framePayloadSize*8.0/1024.0 )/(((DataATCMsg*)msg)->getTxTime());
+            qDebug() << "GuiProcessingSystem::processDataCTAMsg: camera->atc_param.framePayloadSize: " << camera->atc_param.framePayloadSize << endl;
+            qDebug() << "GuiProcessingSystem::processDataCTAMsg: ((DataATCMsg*)msg)->getTxTime(): " << ((DataATCMsg*)msg)->getTxTime() << endl;
+            qDebug() << "GuiProcessingSystem::processDataCTAMsg: bandwidth: " << bandwidth << endl;
+            emit camera->curBandwidthChangedSignal(camera->getGuiIdx(), bandwidth);
+
+
             camera->setGoodDescriptors(camera->getDescriptors());
             camera->setGoodKeypoints(camera->getKeypoints());
             camera->setNbsRecReady(true);

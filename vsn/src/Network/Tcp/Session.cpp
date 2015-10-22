@@ -175,14 +175,24 @@ void Session::_handleReadMessage(const boost::system::error_code& error,
 		case NODETYPE_SINK: {
 			/*
 			 * If the sink correctly decodes the message ,it returns an ack to the camera.
-			 * The ack is used to
 			 */
 			switch (message->getType()) {
-			case MESSAGETYPE_DATA_ATC:
+			case MESSAGETYPE_DATA_ATC: {
+				DataATCMsg* msg = (DataATCMsg*) message;
+				if (msg->getBlockNumber() == msg->getNumBlocks() - 1) {
+					AckMsg* ackMsg = new AckMsg(NetworkNode::getMyself(), src,
+							linkType, msgType, rcvMsgSize, senderStartTxTick);
+					writeMessage(ackMsg);
+				}
+				break;
+			}
 			case MESSAGETYPE_DATA_CTA: {
-				AckMsg* ackMsg = new AckMsg(NetworkNode::getMyself(), src,
-						linkType, msgType, rcvMsgSize, senderStartTxTick);
-				writeMessage(ackMsg);
+				DataCTAMsg* msg = (DataCTAMsg*) message;
+				if (msg->getSliceNumber() == msg->getTotNumSlices() - 1) {
+					AckMsg* ackMsg = new AckMsg(NetworkNode::getMyself(), src,
+							linkType, msgType, rcvMsgSize, senderStartTxTick);
+					writeMessage(ackMsg);
+				}
 				break;
 			}
 			default:
@@ -194,30 +204,32 @@ void Session::_handleReadMessage(const boost::system::error_code& error,
 			switch (message->getType()) {
 			case MESSAGETYPE_ACK: {
 				AckMsg* ackMsg = (AckMsg*) message;
-				/* Store txTime for the current message type */
+				/* Store txTime for the transmission of current message type entire frame (more messages)*/
 				if (_DEBUG)
 					cout << "Session::_sendMessageThread: sendTxStartTick: "
 							<< ackMsg->getSendTxStartTick() << endl;
-				float time = ((float) cv::getTickCount()
-						- (float) ackMsg->getSendTxStartTick())
+				float time = (double) (cv::getTickCount()
+						- ackMsg->getSendTxStartTick())
 						/ cv::getTickFrequency();
-				switch (ackMsg->getReceivedMessageType()) {
-				case MESSAGETYPE_DATA_ATC:
-					if (_DEBUG)
-						cout
-								<< "Session::_sendMessageThread: storing ATC txTime: "
-								<< time << endl;
-					_txTimeATC = time;
-					break;
-				case MESSAGETYPE_DATA_CTA:
-					if (_DEBUG)
-						cout
-								<< "Session::_sendMessageThread: storing CTA txTime: "
-								<< time << endl;
-					_txTimeCTA = time;
-					break;
-				default:
-					break;
+				if (time > FLT_MIN) {
+					switch (ackMsg->getReceivedMessageType()) {
+					case MESSAGETYPE_DATA_ATC:
+						if (_DEBUG)
+							cout
+									<< "Session::_sendMessageThread: storing ATC txTime: "
+									<< time << endl;
+						_txTimeATC = time;
+						break;
+					case MESSAGETYPE_DATA_CTA:
+						if (_DEBUG)
+							cout
+									<< "Session::_sendMessageThread: storing CTA txTime: "
+									<< time << endl;
+						_txTimeCTA = time;
+						break;
+					default:
+						break;
+					}
 				}
 				break;
 			}
@@ -311,7 +323,7 @@ void Session::_sendMessageThread() {
 
 		int64 tick = cv::getTickCount();
 		if (_DEBUG > 1)
-			cout << "Session::_sendMessageThread: setting tick: " << tick
+			cout << "Session::_sendMessageThread: setting send tick: " << tick
 					<< endl;
 
 		Header header(msg->getSrc(), msg->getDst(), msg->getSeqNum(), 1, 0,

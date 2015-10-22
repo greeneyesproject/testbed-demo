@@ -28,6 +28,7 @@ typedef enum {
 typedef struct CTA_param{
     int quality_factor;
     int num_slices;
+    size_t framePayloadSize;
     //.... other params such as num slices (w and h?)
 } CTA_param_t;
 
@@ -46,6 +47,7 @@ typedef struct ATC_param{
     int num_feat_per_block;
     uchar binShift;
     uchar valShift;
+    size_t framePayloadSize;
     // .... other params such as num blocks
 } ATC_param_t;
 

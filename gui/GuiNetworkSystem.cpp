@@ -85,20 +85,10 @@ void GuiNetworkSystem::serverMessageHandler(Session*, Message* msg){
 
     switch(msg->getType()){
     case MESSAGETYPE_DATA_ATC:{
-        float bandwidth = 0;
-        bandwidth = ((double) (msg->getBitstreamSize()))*8.0/1000.0/((double) ((DataATCMsg*)msg)->getTxTime());
-        qDebug() << "GuiNetworkSystem::serverMessageHandler: cam " << camera->getGuiIdx() << " received " << msg->getBitstreamSize() << " bytes";
-        qDebug() << "GuiNetworkSystem::serverMessageHandler: cam " << camera->getGuiIdx() << " bandwidth = " << bandwidth << endl;
-        emit camera->curBandwidthChangedSignal(camera->getGuiIdx(), bandwidth);
         _guiProcessingSystem->processDataATCMsg(camera,(DataATCMsg*)msg);
         break;
     }
     case MESSAGETYPE_DATA_CTA:{
-        float bandwidth = 0;
-        bandwidth = ((double) (msg->getBitstreamSize()))*8.0/1000.0/((double) ((DataCTAMsg*)msg)->getTxTime());
-        qDebug() << "GuiNetworkSystem::serverMessageHandler: cam " << camera->getGuiIdx() << " received " << msg->getBitstreamSize() << " bytes";
-        qDebug() << "GuiNetworkSystem::serverMessageHandler: cam " << camera->getGuiIdx() << " bandwidth = " << bandwidth << endl;
-        emit camera->curBandwidthChangedSignal(camera->getGuiIdx(), bandwidth);
         _guiProcessingSystem->processDataCTAMsg(camera,(DataCTAMsg*)msg);
         break;
     }

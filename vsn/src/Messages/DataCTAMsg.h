@@ -19,6 +19,7 @@ private:
 
 	uchar _frameID;
 	uchar _sliceNumber;
+	uchar _totNumSlices;
 	ushort _topLeft_x;
 	ushort _topLeft_y;
 	uint32_t _dataSize;
@@ -30,10 +31,10 @@ private:
 public:
 	DataCTAMsg(NetworkNode* const src, NetworkNode* const dst,
 			LinkType const linkType, const uchar frameID,
-			const uchar sliceNumber, const ushort topLeft_x,
-			const ushort topLeft_y, const uint32_t dataSize,
-			const float encTime, const float txTime, const Bitstream& data,
-			const OperativeMode opMode);
+			const uchar sliceNumber, const uchar _totNumSlices,
+			const ushort topLeft_x, const ushort topLeft_y,
+			const uint32_t dataSize, const float encTime, const float txTime,
+			const Bitstream& data, const OperativeMode opMode);
 
 	DataCTAMsg(Header* const header, Bitstream* const bitstream);
 
@@ -44,6 +45,9 @@ public:
 	}
 	int getSliceNumber() const {
 		return _sliceNumber;
+	}
+	int getTotNumSlices() const {
+		return _totNumSlices;
 	}
 	ushort getTopLeftX() const {
 		return _topLeft_x;

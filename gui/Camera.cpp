@@ -102,6 +102,7 @@ void Camera::storeParameters(){
 
     cta_param.quality_factor = _QF;
     cta_param.num_slices = _numSlices;
+    cta_param.framePayloadSize = 0;
 
     atc_param.encodeKeypoints = _encodeKeypoints;
     atc_param.encodeFeatures = _encodeFeatures;
@@ -111,6 +112,8 @@ void Camera::storeParameters(){
 
     atc_param.binShift = _binShift;
     atc_param.valShift = _valShift;
+
+    atc_param.framePayloadSize = 0;
 }
 
 void Camera::setATCSlot(bool setter){

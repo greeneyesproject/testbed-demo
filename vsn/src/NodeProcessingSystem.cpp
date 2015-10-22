@@ -303,7 +303,7 @@ void NodeProcessingSystem::_cameraProcessing(Message* msg) {
 						<< endl;
 			DataCTAMsg* reply = new DataCTAMsg(NetworkNode::getMyself(),
 					NetworkNode::getSink(), msg->getLinkType(), _frameId,
-					sliceIdx, topLeftCorner.width, topLeftCorner.height,
+					sliceIdx, numSlices , topLeftCorner.width, topLeftCorner.height,
 					encodedSliceBitstream.size(), encodingTime,
 					transmissionTime, encodedSliceBitstream,
 					message->getOperativeMode());
@@ -782,7 +782,7 @@ void NodeProcessingSystem::_cooperatorService(Message* msg) {
 
 float NodeProcessingSystem::_acquireImage(cv::Mat& image,
 		const OperativeMode opMode_, const ImageSource imgSource_) {
-	float time = cv::getTickCount();
+	int64 time = cv::getTickCount();
 
 	switch (imgSource_) {
 	case IMAGESOURCE_LIVE: {
@@ -805,7 +805,7 @@ float NodeProcessingSystem::_acquireImage(cv::Mat& image,
 					<< "NodeProcessingSystem::_acquireImage: opMode_ case not managed:"
 					<< opMode_ << endl;
 		}
-
+		break;
 	}
 	default:
 		cerr
@@ -823,7 +823,7 @@ float NodeProcessingSystem::_acquireImage(cv::Mat& image,
 		cout << "NodeProcessingSystem::_acquireImage: image.type(): "
 				<< image.type() << endl;
 	}
-	return (cv::getTickCount() - time) / cv::getTickFrequency();
+	return (double)(cv::getTickCount() - time) / cv::getTickFrequency();
 }
 
 cv::Size NodeProcessingSystem::_imageSlice(const cv::Mat& src, cv::Mat& dst,
@@ -843,61 +843,61 @@ cv::Size NodeProcessingSystem::_imageSlice(const cv::Mat& src, cv::Mat& dst,
 
 float NodeProcessingSystem::_jpegEncode(const cv::Mat& image,
 		Bitstream& bitstream, unsigned char qf) const {
-	float time = cv::getTickCount();
+	int64 time = cv::getTickCount();
 	vector<int> param = vector<int>(2);
 	param[0] = CV_IMWRITE_JPEG_QUALITY;
 	param[1] = qf;
 	cv::imencode(".jpg", image, bitstream, param);
-	return (cv::getTickCount() - time) / cv::getTickFrequency();
+	return (double)(cv::getTickCount() - time) / cv::getTickFrequency();
 }
 
 float NodeProcessingSystem::_briskExtractKeypoints(const cv::Mat& image,
 		std::vector<cv::KeyPoint>& keypoints, float detectorThreshold) const {
-	float time = cv::getTickCount();
+	int64 time = cv::getTickCount();
 	const detParams& parms = BRISK_detParams(detectorThreshold);
 	_briskExtractor->setDetectorParameters(DETECTORTYPE_BRISK, parms);
 	_briskExtractor->extractKeypoints(image, keypoints);
-	return (cv::getTickCount() - time) / cv::getTickFrequency();
+	return (double)(cv::getTickCount() - time) / cv::getTickFrequency();
 }
 
 float NodeProcessingSystem::_briskExtractFeatures(const cv::Mat& image,
 		std::vector<cv::KeyPoint>& keypoints, cv::Mat& features,
 		unsigned short maxFeatures) const {
-	float time = cv::getTickCount();
+	int64 time = cv::getTickCount();
 	_briskExtractor->extractFeatures(image, keypoints, features);
 	_briskExtractor->cutFeatures(keypoints, features, maxFeatures);
-	return (cv::getTickCount() - time) / cv::getTickFrequency();
+	return (double)(cv::getTickCount() - time) / cv::getTickFrequency();
 }
 
 float NodeProcessingSystem::_histExtractFeatures(const cv::Mat& image,
 		std::vector<cv::KeyPoint>& keypoints, cv::Mat& features,
 		const uchar binshift) const {
-	float time = cv::getTickCount();
+	int64 time = cv::getTickCount();
 
 	const descParams& parms = HIST_descParams(binshift, 180);
 	_histExtractor->setDescriptorParameters(DESCRIPTORTYPE_HIST, parms);
 	_histExtractor->extractFeatures(image, keypoints, features);
 
-	return (cv::getTickCount() - time) / cv::getTickFrequency();
+	return (double)(cv::getTickCount() - time) / cv::getTickFrequency();
 }
 
 float NodeProcessingSystem::_encodeKeypoints(
 		const std::vector<cv::KeyPoint>& keypoints, Bitstream& bitstream,
 		const cv::Size imageSize, bool encodeAngles, bool encode) const {
-	float time = cv::getTickCount();
+	int64 time = cv::getTickCount();
 
 	if (_DEBUG)
 		cout << "NodeProcessingSystem::_encodeKeypoints: encoding " << endl;
 	_encoder->encodeKeyPoints(codingParams(encode), keypoints, bitstream,
 			imageSize, encodeAngles);
 
-	return (cv::getTickCount() - time) / cv::getTickFrequency();
+	return (double)(cv::getTickCount() - time) / cv::getTickFrequency();
 }
 
 float NodeProcessingSystem::_encodeFeatures(const cv::Mat& features,
 		Bitstream& bitstream, const DescriptorType encoderType,
 		const codingParams &parms) const {
-	float time = cv::getTickCount();
+	int64 time = cv::getTickCount();
 
 	if (_DEBUG)
 		cout << "NodeProcessingSystem::_encodeFeatures: encoding " << endl;
@@ -916,7 +916,7 @@ float NodeProcessingSystem::_encodeFeatures(const cv::Mat& features,
 		cout << endl;
 	}
 
-	return (cv::getTickCount() - time) / cv::getTickFrequency();
+	return (double)(cv::getTickCount() - time) / cv::getTickFrequency();
 }
 
 void NodeProcessingSystem::_sendATC(const std::vector<cv::KeyPoint>& keypoints,

@@ -613,7 +613,7 @@ void OffloadingManager::transmitLoads() {
 
 		double time = getTickCount();
 		DataCTAMsg* coopMsg = new DataCTAMsg(NetworkNode::getMyself(),
-				cooperators[i].node, LINKTYPE_TCP, _frameId++, 0,
+				cooperators[i].node, LINKTYPE_TCP, _frameId++, 0, 1,
 				top_left_xCoordinate, top_left_yCoordinate, bitstream.size(),
 				enc_time, 0, bitstream,_lastOpMode);
 
