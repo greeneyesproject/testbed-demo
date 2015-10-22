@@ -91,6 +91,7 @@ public:
     void storeParameters();
 
     CameraModeType getCurrentMode() const{ return _currentMode;}
+    void setCurrentMode(CameraModeType const currentMode){ _currentMode = currentMode;}
 
     uint getGuiIdx (){ return _guiIdx; }
 
@@ -108,17 +109,19 @@ public:
     string getIpAddr(){return _ipaddr;}
 
     int getQf() const { return _QF; }
+    void setQf(const int QF) { _QF = QF; }
 
     int getNumCoop() const { return _nCoop; }
+    void setNumCoop(const int nCoop) { _nCoop = nCoop; }
 
     bool getDatc() const { return _datc; }
     void setDatc(bool datc) { _datc = datc; }
 
-    OperativeMode getOperativeMode(){return _operativeMode;}
+    OperativeMode getOperativeMode() const {return _operativeMode;}
     void setOperativeMode(OperativeMode);
 
-    ImageSource getImageSource(){return _imageSource;}
-    void setImageSource(ImageSource imgSrc_){ _imageSource = imgSrc_;}
+    ImageSource getImageSource() const {return _imageSource;}
+    void setImageSource(ImageSource const imgSrc_){ _imageSource = imgSrc_;}
 
     //***NBS***/
     bool getNbsReady() {return _nbsReady;}
@@ -155,10 +158,13 @@ public:
     void setEncodeFeatures(bool encodeFeatures) { _encodeFeatures = encodeFeatures; }
 
     bool getShowReconstruction() const { return _showR; }
+    void setShowReconstruction(const bool showR) { _showR = showR; }
 
     bool getTrackingEnabled() const { return _tracking; }
+    void setTrackingEnabled(const bool tracking) { _tracking = tracking; }
 
     int getMaxNumFeatures() const { return _maxF; }
+    void setMaxNumFeatures(const int maxF) { _maxF = maxF; }
 
     int getDetThres() const { return _detThres; }
     void setDetThres(int detThres) { _detThres = detThres; }
@@ -187,6 +193,7 @@ public:
     cv::Mat getATCRecFrameClean() const {return _ATCRecFrameClean; }
 
     bool getRecognitionEnabled() const { return _recognition; }
+    void setRecognitionEnabled(const bool recognition) {_recognition = recognition;}
 
     double getTempTxTime() const { return _tempTxTime; }
     void setTempTxTime(double tempTxTime) { _tempTxTime = tempTxTime; }
@@ -237,7 +244,7 @@ public:
     cv::Mat getPklotOnlyOccupancy();
 
     void setWifiBw(int bw_){ _wifiBw = bw_;}
-    int getWifiBw(){return _wifiBw;}
+    int getWifiBw() const {return _wifiBw;}
 
 signals:
 
@@ -269,21 +276,10 @@ signals:
 
 public slots:
 
-    void setCurrentModeSlot(CameraModeType currentMode){ _currentMode = currentMode;}
-
     void setATCSlot(bool);
     void setCTAFrameSlot(const cv::Mat &CTAFrame){_CTAFrame = CTAFrame;}
     void setATCFrameSlot(const cv::Mat &ATCFrame){_ATCFrame = ATCFrame;}
 
-    void setQfSlot(int QF) { _QF = QF; }
-    void setNumCoopSlot(int nCoop) { _nCoop = nCoop; }
-    void setShowReconstructionSlot(bool showR) { _showR = showR; }
-    void setTrackingEnabledSlot(bool tracking) { _tracking = tracking; }
-
-    void setRecognitionEnabledSlot(bool recognition) {
-        _recognition = recognition;
-    }
-    void setMaxNumFeaturesSlot(int maxF) { _maxF = maxF; }
     void setObjectSlot(const string &object){ _object=object; }
     void setNumAvailableCooperatorsSlot(int nCoopAvailable){
         _nCoopAvailable = nCoopAvailable;

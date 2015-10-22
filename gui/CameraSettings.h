@@ -44,6 +44,8 @@ private:
 
     void setSelectedCameraParameters();
 
+    void _alignNbs();
+
 public slots:
 
     void atcCtaRadioSwitchSlot(QAbstractButton* button);

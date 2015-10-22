@@ -126,7 +126,7 @@ void CameraSettings::atcCtaRadioSwitchSlot(QAbstractButton* button){
     //qDebug() << "ATC_CTA_radio_switch: button" << button;
     if (button == ui->radioButton_ATC){
         if (_selectedCamera->getCurrentMode()!=CAMERA_MODE_ATC){
-            _selectedCamera->setCurrentModeSlot(CAMERA_MODE_ATC);
+            _selectedCamera->setCurrentMode(CAMERA_MODE_ATC);
             setSelectedCameraParameters();
         }else{
             /* Needed to fix radio button change if already checked */
@@ -135,7 +135,10 @@ void CameraSettings::atcCtaRadioSwitchSlot(QAbstractButton* button){
         }
     }else if (button == ui->radioButton_CTA){
         if (_selectedCamera->getCurrentMode()!=CAMERA_MODE_CTA){
-            _selectedCamera->setCurrentModeSlot(CAMERA_MODE_CTA);
+            _selectedCamera->setCurrentMode(CAMERA_MODE_CTA);
+            if (_selectedCamera->getNbs()){
+                nbsToggledSlot(false);
+            }
             setSelectedCameraParameters();
         }else{
             /* Needed to fix radio button change if already checked */
@@ -176,7 +179,7 @@ void CameraSettings::sinkCameraLinkRadioSwitchSlot(QAbstractButton* button){
 void CameraSettings::entropyToggledSlot(bool value){
 
     _selectedCamera->setEncodeFeatures(value);
-
+    _alignNbs();
     setSelectedCameraParameters();
 }
 
@@ -195,6 +198,8 @@ void CameraSettings::detectionThresholdModifiedSlot(int value){
         break;
     }
 
+    _alignNbs();
+
     setSelectedCameraParameters();
 
 }
@@ -202,6 +207,7 @@ void CameraSettings::detectionThresholdModifiedSlot(int value){
 void CameraSettings::wifiBwModifiedSlot(int value){
 
     _selectedCamera->setWifiBw(value);
+    _alignNbs();
     setSelectedCameraParameters();
 
 }
@@ -211,7 +217,7 @@ void CameraSettings::maxFeaturesModifiedSlot(int value){
     switch(_selectedCamera->getOperativeMode()){
     case OPERATIVEMODE_OBJECT:
         if (_selectedCamera->getMaxNumFeatures()!=value){
-            _selectedCamera->setMaxNumFeaturesSlot(value);
+            _selectedCamera->setMaxNumFeatures(value);
         }
         break;
     case OPERATIVEMODE_PKLOT:
@@ -220,14 +226,14 @@ void CameraSettings::maxFeaturesModifiedSlot(int value){
         }
         break;
     }
-
+    _alignNbs();
     setSelectedCameraParameters();
 }
 
 void CameraSettings::showReconstructionModifiedSlot(bool value){
 
     if (_selectedCamera->getShowReconstruction()!=value){
-        _selectedCamera->setShowReconstructionSlot(value);
+        _selectedCamera->setShowReconstruction(value);
     }
 
     setSelectedCameraParameters();
@@ -265,14 +271,14 @@ void CameraSettings::datcToggledSlot(bool value){
 
 void CameraSettings::numCooperatorsModifiedSlot(int value){
 
-    _selectedCamera->setNumCoopSlot(value);
+    _selectedCamera->setNumCoop(value);
     emit numCoopChangedSignal(_selectedCamera->getId(), value);
     setSelectedCameraParameters();
 
 }
 
 void CameraSettings::qfModifiedSlot(int value){
-    _selectedCamera->setQfSlot(value);
+    _selectedCamera->setQf(value);
     setSelectedCameraParameters();
 
 }
@@ -280,6 +286,7 @@ void CameraSettings::qfModifiedSlot(int value){
 void CameraSettings::numFeatPerBlockModifiedSlot(int value){
 
     _selectedCamera->setNumFeatPerBlock(value);
+    _alignNbs();
     setSelectedCameraParameters();
 
 }
@@ -447,6 +454,7 @@ void CameraSettings::setSelectedCameraParameters(){
         _selectedCamera->setBargainCamera(bargainCamera);
     }
     ui->comboBox_ATCnbsSelectCamera->blockSignals(false);
+    ui->checkBox_ATCenableNBS->setChecked(_selectedCamera->getNbs());
     ui->checkBox_ATCenableNBS->blockSignals(false);
     //***NBS***//
 
@@ -511,7 +519,7 @@ void CameraSettings::setSelectedCameraParameters(){
             ui->horizontalSlider_ATCmaxFeatQuantStep->setEnabled(true);
             ui->spinBox_ATCmaxFeatQuantStep->setEnabled(true);
             ui->checkBox_ATCencodeKeypoints->setEnabled(true);
-            ui->checkBox_ATCshowReconstruction->setEnabled(true);
+            ui->checkBox_ATCshowReconstruction->setEnabled(!(_selectedCamera->getCurrentMode()==CAMERA_MODE_ATC && _selectedCamera->getNbs()));
             ui->checkBox_ATCentropyCoding->setEnabled(true);
             ui->spinBox_ATCfeaturesPerBlock->setEnabled(true);
 
@@ -608,7 +616,7 @@ void CameraSettings::setSelectedCameraParameters(){
     /* Recognition and tracking */
     switch(_selectedCamera->getOperativeMode()){
     case OPERATIVEMODE_OBJECT:
-        ui->checkBox_enableTracking->setEnabled(true);
+        ui->checkBox_enableTracking->setEnabled(!(_selectedCamera->getCurrentMode()==CAMERA_MODE_ATC && _selectedCamera->getNbs()));
         break;
     case OPERATIVEMODE_PKLOT:
         ui->checkBox_enableTracking->setEnabled(false);
@@ -688,6 +696,7 @@ void CameraSettings::toggleCameraSlot(){
 void CameraSettings::encodeKeypointsToggledSlot(bool value){
 
     _selectedCamera->setEncodeKeypoints(value);
+    _alignNbs();
     setSelectedCameraParameters();
 }
 
@@ -700,45 +709,34 @@ void CameraSettings::nbsToggledSlot(bool value){
     //if(_selectedCamera->getNbs())
     //    qDebug() << "camera " << _selectedCamera << " will bargain with " << _selectedCamera->getBargainCamera()->getId();
 
-    setSelectedCameraParameters();
-
     //TRIGGER NBS SELECTION ALSO ON BARGAINING CAMERA
-    Camera* bargainingCamera;
-    for(int i=0;i<_cameras->size();i++){
-        if(((Camera*)(_cameras->at(i)))->getId() == _selectedCamera->getBargainCamera()->getId()){
-            bargainingCamera = _cameras->at(i);
-            break;
-        }
-    }
+    Camera* bargainingCamera = Camera::getCameraById(_selectedCamera->getBargainCamera()->getId());
+
     bargainingCamera->setNbs(value);
     bargainingCamera->setBargainCamera(_selectedCamera);
-    if(value){
-        bargainingCamera->setCurrentModeSlot(CAMERA_MODE_ATC);
-        bargainingCamera->setDetThres(_selectedCamera->getDetThres());
-        bargainingCamera->setEncodeFeatures(_selectedCamera->getEncodeFeatures());
-        bargainingCamera->setMaxNumFeaturesSlot(_selectedCamera->getMaxNumFeatures());
-        bargainingCamera->setNumFeatPerBlock(_selectedCamera->getNumFeatPerBlock());
+
+    if (value){
+        /* Tracking and reconstruction are not so good with nbs. Disable it */
+        _selectedCamera->setShowReconstruction(false);
+        _selectedCamera->setTrackingEnabled(false);
+
+        bargainingCamera->setShowReconstruction(false);
+        bargainingCamera->setTrackingEnabled(false);
     }
 
+    _alignNbs();
 
+    setSelectedCameraParameters();
 }
 
 void CameraSettings::nbsSelectSlot(){
     if(_cameras->size()>1){
         uint bargainCameraId = (uint)ui->comboBox_ATCnbsSelectCamera->currentText().toInt();
-        Camera* bargainCamera;
-        for(int i=0;i<_cameras->size();i++){
-            if(((Camera*)(_cameras->at(i)))->getId() == bargainCameraId){
-                bargainCamera = _cameras->at(i);
-                break;
-            }
-        }
+        Camera* bargainCamera = Camera::getCameraById(bargainCameraId);
         _selectedCamera->setBargainCamera(bargainCamera);
+        setSelectedCameraParameters();
     }
-
     //qDebug() << "camera " << _selectedCamera << " will bargain with " << _selectedCamera->getBargainCamera()->getId();
-
-    setSelectedCameraParameters();
 }
 
 //***NBS***//
@@ -765,17 +763,17 @@ void CameraSettings::numAvailableCooperatorsModifiedSlot(uint camId, int nCoop){
 
 void CameraSettings::recognitionToggledSlot(bool checked){
 
-    _selectedCamera->setRecognitionEnabledSlot(checked);
+    _selectedCamera->setRecognitionEnabled(checked);
     //qDebug() << "recognition is " << _selectedCamera->getRecognitionEnabled() << " on " << _selectedCamera;
     if (!checked)
         emit _selectedCamera->recognitionCompletedSignal("","--");
-
+    _alignNbs();
     setSelectedCameraParameters();
 }
 
 void CameraSettings::trackingToggledSlot(bool checked){
 
-    _selectedCamera->setTrackingEnabledSlot(checked);
+    _selectedCamera->setTrackingEnabled(checked);
     //qDebug() << "tracking is " << _selectedCamera->getTrackingEnabled() << " on " << _selectedCamera;
 
     setSelectedCameraParameters();
@@ -794,6 +792,9 @@ void CameraSettings::operativeModeToggledSlot(QAbstractButton* button){
     }else if(button == ui->radioButton_parkingLot){
         ui->radioButton_objects->setChecked(false);
         ui->radioButton_parkingLot->setChecked(true);
+        if (_selectedCamera->getNbs()){
+            nbsToggledSlot(false);
+        }
         _selectedCamera->setOperativeMode(OPERATIVEMODE_PKLOT);
     }
 
@@ -817,4 +818,31 @@ void CameraSettings::imageSourceToggledSlot(QAbstractButton* button){
     }
 
     setSelectedCameraParameters();
+}
+
+/**
+ * @brief CameraSettings::_alignNbs
+ * If NBS activated for _selectedCamera, copy NBS useful parameters from _selectedCamera camera to bargain camera
+ * @param src
+ * @param dst
+ */
+void CameraSettings::_alignNbs(){
+
+    if (!_selectedCamera->getNbs()){
+        return;
+    }
+
+    Camera * const bargainingCamera = Camera::getCameraById(_selectedCamera->getBargainCamera()->getId());
+    Camera * const dst = bargainingCamera;
+    Camera const * const src = _selectedCamera;
+
+    dst->setDetThres(src->getDetThres());
+    dst->setMaxNumFeatures(src->getMaxNumFeatures());
+    dst->setEncodeKeypoints(src->getEncodeKeypoints());
+    dst->setEncodeFeatures(src->getEncodeFeatures());
+    dst->setNumFeatPerBlock(src->getNumFeatPerBlock());
+    dst->setWifiBw(src->getWifiBw());
+    dst->setRecognitionEnabled(src->getRecognitionEnabled());
+    dst->setOperativeMode(src->getOperativeMode());
+    dst->setCurrentMode(src->getCurrentMode());
 }

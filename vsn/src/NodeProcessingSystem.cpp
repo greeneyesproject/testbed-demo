@@ -339,13 +339,11 @@ void NodeProcessingSystem::_cameraProcessing(Message* msg) {
 			cout << "NodeProcessingSystem::_cameraProcessing: acquisitionTime: "
 					<< acquisitionTime << endl;
 
-		//TODO check if avoidable
-		/*Bitstream jpegBitstream;
-		 vector<int> param = vector<int>(2);
-		 param[0] = CV_IMWRITE_JPEG_QUALITY;
-		 param[1] = 100;
-		 cv::imencode(".jpg", image, jpegBitstream, param);
-		 image = cv::imdecode(jpegBitstream, cv::IMREAD_UNCHANGED);*/
+		/* When NBS activated need to cut the acquired image */
+		cv::Size topLeft = message->getTopLeft();
+		cv::Size bottomRight = message->getBottomRight();
+
+		image = image.rowRange(topLeft.height,bottomRight.height).colRange(topLeft.width,bottomRight.width);
 
 		_gpios[1]->setValue(BlackLib::low);  //Reset acquisition pin
 
