@@ -478,12 +478,18 @@ float NodeNetworkSystem::prepareWifiBandwidthControl(const string sinkIpAddr_,
 
 float NodeNetworkSystem::setWifiBandwidth(const ushort bw_) {
 
-	float time = cv::getTickCount();
+	int64 time = cv::getTickCount();
 
 	if (_lo || (bw_ == _wifiBandwidth))
 		return 0;
 	_wifiBandwidth = bw_;
 
+	boost::thread(&NodeNetworkSystem::_setWifiBandwidthThread, this);
+
+	return (double) (cv::getTickCount() - time) / cv::getTickFrequency();
+}
+
+void NodeNetworkSystem::_setWifiBandwidthThread() {
 	int ret;
 
 	stringstream ss;
@@ -493,10 +499,8 @@ float NodeNetworkSystem::setWifiBandwidth(const ushort bw_) {
 			<< "kbit allot 1500 prio 5 bounded isolated" << endl;
 
 	if (_DEBUG)
-		cout << "NodeProcessingSystem::_setWifiBandwidth: " << ss.str();
+		cout << "NodeProcessingSystem::_setWifiBandwidthThread: " << ss.str();
 	ret = system(ss.str().c_str());
 	if (_DEBUG)
-		cout << "NodeProcessingSystem::_setWifiBandwidth: ret: " << ret << endl;
-
-	return (cv::getTickCount() - time) / cv::getTickFrequency();
+		cout << "NodeProcessingSystem::_setWifiBandwidthThread: ret: " << ret << endl;
 }

@@ -80,6 +80,8 @@ private:
 
 	bool _addNetworkNode(Session*, NodeInfoMsg*);
 
+	void _setWifiBandwidthThread();
+
 	static NodeNetworkSystem* _instance;
 
 	static BlackLib::BlackGPIO** _gpios;
