@@ -104,7 +104,7 @@ NodeNetworkSystem::NodeNetworkSystem(boost::asio::io_service& ioService,
 				client->getSession());
 	}
 
-	_wifiBandwidth = 8000;
+	_wifiBandwidth = 20;
 
 	_linkInterface = "wlan0";
 

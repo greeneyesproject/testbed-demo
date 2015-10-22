@@ -61,7 +61,7 @@ void GuiProcessingSystem::processDataCTAMsg(Camera *camera, DataCTAMsg* msg){
     bottom_right.y = top_left.y + R;
 
     camera->setTempProcTime(camera->getTempProcTime() + msg->getEncodingTime());
-    if (msg->getLinkType()==LINKTYPE_TELOS){
+    if (camera->getLinkType()==LINKTYPE_TELOS){
         camera->setTempTxTime(camera->getTempTxTime() + msg->getTxTime());
     }else{
         camera->setTempTxTime(msg->getTxTime());
@@ -84,9 +84,9 @@ void GuiProcessingSystem::processDataCTAMsg(Camera *camera, DataCTAMsg* msg){
     cout << "GuiProcessingSystem::processDataCTAMsg: slice" << msg->getSliceNumber()+1 << "/" << camera->cta_param.num_slices << endl;
     if(msg->getSliceNumber() == camera->cta_param.num_slices-1){
 
-        float bandwidth = (double)( camera->cta_param.framePayloadSize*8.0/1024.0 )/(((DataCTAMsg*)msg)->getTxTime());
+        float bandwidth = (double)( camera->cta_param.framePayloadSize*8.0/1024.0 )/camera->getTempTxTime();
         qDebug() << "GuiProcessingSystem::processDataCTAMsg: camera->cta_param.framePayloadSize: " << camera->cta_param.framePayloadSize << endl;
-        qDebug() << "GuiProcessingSystem::processDataCTAMsg: ((DataCTAMsg*)msg)->getTxTime(): " << ((DataCTAMsg*)msg)->getTxTime() << endl;
+        qDebug() << "GuiProcessingSystem::processDataCTAMsg: camera->getTempTxTime(): " << camera->getTempTxTime() << endl;
         qDebug() << "GuiProcessingSystem::processDataCTAMsg: bandwidth: " << bandwidth << endl;
         emit camera->curBandwidthChangedSignal(camera->getGuiIdx(), bandwidth);
 
@@ -208,7 +208,7 @@ void GuiProcessingSystem::processDataATCMsg(Camera* camera, DataATCMsg* msg){
                 msg->getKptsEncodingTime() +
                 msg->getFeatEncodingTime());
 
-    if (msg->getLinkType()==LINKTYPE_TELOS){
+    if (camera->getLinkType()==LINKTYPE_TELOS){
         camera->setTempTxTime(camera->getTempTxTime() + msg->getTxTime());
     }else{
         camera->setTempTxTime(msg->getTxTime());
@@ -328,9 +328,9 @@ void GuiProcessingSystem::processDataATCMsg(Camera* camera, DataATCMsg* msg){
 
         if(msg->getBlockNumber() == msg->getNumBlocks()-1){
 
-            float bandwidth = (double)( camera->atc_param.framePayloadSize*8.0/1024.0 )/(((DataATCMsg*)msg)->getTxTime());
+            float bandwidth = (double)( camera->atc_param.framePayloadSize*8.0/1024.0 )/camera->getTempTxTime();
             qDebug() << "GuiProcessingSystem::processDataCTAMsg: camera->atc_param.framePayloadSize: " << camera->atc_param.framePayloadSize << endl;
-            qDebug() << "GuiProcessingSystem::processDataCTAMsg: ((DataATCMsg*)msg)->getTxTime(): " << ((DataATCMsg*)msg)->getTxTime() << endl;
+            qDebug() << "GuiProcessingSystem::processDataCTAMsg: camera->getTempTxTime(): " << camera->getTempTxTime() << endl;
             qDebug() << "GuiProcessingSystem::processDataCTAMsg: bandwidth: " << bandwidth << endl;
             emit camera->curBandwidthChangedSignal(camera->getGuiIdx(), bandwidth);
 
