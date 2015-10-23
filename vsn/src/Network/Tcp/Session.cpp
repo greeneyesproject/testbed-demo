@@ -32,8 +32,6 @@ Session::Session(boost::asio::io_service& ioService,
 
 	_deleted = false;
 
-	_tick = 0;
-
 	_txTimeATC = 0;
 	_txTimeCTA = 0;
 
@@ -129,7 +127,6 @@ void Session::_handleReadHeader(const boost::system::error_code& error,
 		_interface->errorHandler(this, error);
 		return;
 	}
-	_tick = cv::getTickCount();
 	_header = Header::headerFromIpBitstream(_headerBitstream);
 	_readMessage();
 }
@@ -158,14 +155,11 @@ void Session::_handleReadMessage(const boost::system::error_code& error,
 		return;
 	}
 
+	/* Need to do this before header and messageBistream being deleted by the parser */
 	NetworkNode* const src = _header->getSrc();
 	const LinkType linkType = _header->getLinkType();
 	const MessageType msgType = _header->getMsgType();
 	const uint32_t rcvMsgSize = _messageBitstream->size();
-	const int64 senderStartTxTick = _header->getStartTick();
-
-	if (_DEBUG)
-		cout << "Session::_handleReadMessage: retrieved Ack data" << endl;
 
 	Message* message = MessageParser::parseMessage(_header, _messageBitstream);
 
@@ -181,7 +175,7 @@ void Session::_handleReadMessage(const boost::system::error_code& error,
 				DataATCMsg* msg = (DataATCMsg*) message;
 				if (msg->getBlockNumber() == msg->getNumBlocks() - 1) {
 					AckMsg* ackMsg = new AckMsg(NetworkNode::getMyself(), src,
-							linkType, msgType, rcvMsgSize, senderStartTxTick);
+							linkType, msgType, rcvMsgSize, msg->getStartTick());
 					writeMessage(ackMsg);
 				}
 				break;
@@ -190,7 +184,7 @@ void Session::_handleReadMessage(const boost::system::error_code& error,
 				DataCTAMsg* msg = (DataCTAMsg*) message;
 				if (msg->getSliceNumber() == msg->getTotNumSlices() - 1) {
 					AckMsg* ackMsg = new AckMsg(NetworkNode::getMyself(), src,
-							linkType, msgType, rcvMsgSize, senderStartTxTick);
+							linkType, msgType, rcvMsgSize, msg->getStartTick());
 					writeMessage(ackMsg);
 				}
 				break;
@@ -261,7 +255,22 @@ void Session::writeMessage(Message* msg) {
 	if (msg == NULL) {
 		throw "Session::writeMessage: empty message";
 	}
+
+	int64 tick = cv::getTickCount();
+
+	switch (msg->getType()) {
+	case MESSAGETYPE_DATA_ATC:
+		((DataATCMsg*) msg)->setStartTick(tick);
+		break;
+	case MESSAGETYPE_DATA_CTA:
+		((DataCTAMsg*) msg)->setStartTick(tick);
+		break;
+	default:
+		break;
+	}
+
 	_messagesQueue.push(msg);
+
 }
 
 void Session::_sendMessageThread() {
@@ -321,13 +330,8 @@ void Session::_sendMessageThread() {
 					<< " - message bitstream length: " << msgBitstream->size()
 					<< " byte" << endl;
 
-		int64 tick = cv::getTickCount();
-		if (_DEBUG > 1)
-			cout << "Session::_sendMessageThread: setting send tick: " << tick
-					<< endl;
-
 		Header header(msg->getSrc(), msg->getDst(), msg->getSeqNum(), 1, 0,
-				msg->getType(), msg->getLinkType(), msgBitstream->size(), tick);
+				msg->getType(), msg->getLinkType(), msgBitstream->size());
 
 		bool notifySendEnd = msg->getType() == MESSAGETYPE_DATA_ATC
 				|| msg->getType() == MESSAGETYPE_DATA_CTA;

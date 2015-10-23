@@ -74,8 +74,6 @@ private:
 
 	boost::thread* _sendThread;
 
-	long unsigned _tick;
-
 	/**
 	 * Class that implements session callbacks
 	 */

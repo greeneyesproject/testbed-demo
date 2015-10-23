@@ -45,7 +45,7 @@ void GuiProcessingSystem::processDataCTAMsg(Camera *camera, DataCTAMsg* msg){
     }
 
     /* Reset restart timer */
-    emit camera->startCameraTimerSignal();
+    //emit camera->startCameraTimerSignal();
 
     /* CV_8UC1 */
     cv::Mat slice = imdecode(*(msg->getData()),CV_LOAD_IMAGE_UNCHANGED);
@@ -61,6 +61,7 @@ void GuiProcessingSystem::processDataCTAMsg(Camera *camera, DataCTAMsg* msg){
     bottom_right.y = top_left.y + R;
 
     camera->setTempProcTime(camera->getTempProcTime() + msg->getEncodingTime());
+
     if (camera->getLinkType()==LINKTYPE_TELOS){
         camera->setTempTxTime(camera->getTempTxTime() + msg->getTxTime());
     }else{
@@ -199,14 +200,20 @@ void GuiProcessingSystem::processDataATCMsg(Camera* camera, DataATCMsg* msg){
     cout << "Camera " << camera->getId() << endl;
 
     /* Reset restart timer */
-    emit camera->startCameraTimerSignal();
+    //emit camera->startCameraTimerSignal();
 
-    camera->setTempProcTime(
-                camera->getTempProcTime() +
-                msg->getDetTime() +
-                msg->getDescTime() +
-                msg->getKptsEncodingTime() +
-                msg->getFeatEncodingTime());
+    if (msg->getBlockNumber() == 0){
+        camera->setTempProcTime(
+                    msg->getDetTime() +
+                    msg->getDescTime() +
+                    msg->getKptsEncodingTime() +
+                    msg->getFeatEncodingTime());
+    }else{
+        camera->setTempProcTime(
+                    camera->getTempProcTime() +
+                    msg->getKptsEncodingTime() +
+                    msg->getFeatEncodingTime());
+    }
 
     if (camera->getLinkType()==LINKTYPE_TELOS){
         camera->setTempTxTime(camera->getTempTxTime() + msg->getTxTime());
@@ -554,9 +561,10 @@ bool GuiProcessingSystem::sendStartATC(Camera* camera){
 //***NBS***//
 bool GuiProcessingSystem::sendStartATCNBS(Camera* camera){
 
-
+    Camera* bargainCamera = camera->getBargainCamera();
     camera->storeParameters();
-    camera->getBargainCamera()->storeParameters();
+    bargainCamera->storeParameters();
+    bargainCamera->setActive(true);
     camera->setNbsReady(false);
     camera->setNbsReady(false);
 
@@ -568,7 +576,7 @@ bool GuiProcessingSystem::sendStartATCNBS(Camera* camera){
     //    emit camera->stoppedSignal(camera->getId());
 
     //    //stop bargaining camera
-    Camera* bargainCamera = camera->getBargainCamera();
+
     //    StopMsg* msg2 = new StopMsg(NetworkNode::getGui(),
     //                               NetworkNode::getCameraById(bargainCamera->getId()),
     //                               bargainCamera->getLinkType());

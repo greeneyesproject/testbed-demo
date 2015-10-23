@@ -56,6 +56,8 @@ inverse_BRISK::inverse_BRISK(VisualFeatureExtraction* briskExtractor_, int imWid
     erosionKernel = (Mat_<uchar>(3,3) << 0, 1, 0, 1, 0, 1, 0, 1, 0);
     imW = imWidth;
     imH = imHeight;
+
+    _running.resize(Camera::getCameras()->size(),false);
 }
 
 int inverse_BRISK::build_database(string path){
@@ -542,11 +544,17 @@ void inverse_BRISK::poisson_stitch(Mat srcPatch, Mat srcMask, Mat dst, Mat dstMa
 
 }
 
-void inverse_BRISK::invertBRISKOnCam(int camId){
+void inverse_BRISK::invertBRISKOnCamSlot(int camId){
 
     Camera * cur_cam = (*(cameras()))[camId];
-    cur_cam->setATCRecFrame(invert_BRISK(cur_cam->getGoodDescriptors(), cur_cam->getGoodKeypoints()));
-
+    if (!_running.at(camId)){
+        _running.at(camId) = true;
+        cv::Mat inverse = invert_BRISK(cur_cam->getGoodDescriptors(), cur_cam->getGoodKeypoints());
+        if (cur_cam->getShowReconstruction()){
+            cur_cam->setATCRecFrame(inverse);
+        }
+        _running.at(camId) = false;
+    }
 }
 
 void inverse_BRISK::connectTasks(int nCam){
@@ -555,7 +563,7 @@ void inverse_BRISK::connectTasks(int nCam){
         Camera * a = (*cameras_)[i];
 
         std::cout << "connecting inverse BRISK task" << std::endl << std::endl;
-        connect(a, SIGNAL(reconstructFrameSignal(int)), this, SLOT(invertBRISKOnCam(int)));
+        connect(a, SIGNAL(reconstructFrameSignal(int)), this, SLOT(invertBRISKOnCamSlot(int)));
     }
 
 }

@@ -20,7 +20,7 @@ using namespace std;
 DataCTAMsg::DataCTAMsg(NetworkNode* const src, NetworkNode* const dst,
 		const LinkType linkType, const uchar frameID, const uchar sliceNumber, const uchar totNumSlices,
 		const ushort topLeft_x, const ushort topLeft_y, const uint32_t dataSize,
-		const float encTime, const float txTime, const Bitstream& data, const OperativeMode opMode) :
+		const float encTime, const float txTime, const Bitstream& data, const OperativeMode opMode, const int64 startTick) :
 		Message(src, dst, linkType) {
 
 	_msg_type = MESSAGETYPE_DATA_CTA;
@@ -34,6 +34,7 @@ DataCTAMsg::DataCTAMsg(NetworkNode* const src, NetworkNode* const dst,
 	_txTime = txTime;
 	_data = data;
 	_operativeMode = opMode;
+	_startTick = startTick;
 }
 
 DataCTAMsg::DataCTAMsg(Header* const header, Bitstream* const bitstream) :
@@ -49,17 +50,12 @@ DataCTAMsg::DataCTAMsg(Header* const header, Bitstream* const bitstream) :
 	_topLeft_x = 0;
 	_topLeft_y = 0;
 	_operativeMode = 0;
-
-	double tick = cv::getTickCount();
+	_startTick = 0;
 
 	stringstream ss;
 	ss.rdbuf()->pubsetbuf((char*) bitstream->data(), bitstream->size());
 	cereal::BinaryInputArchive ia(ss);
 	ia >> (*this);
-
-	double time = ((double) (cv::getTickCount() - tick))
-			/ cv::getTickFrequency();
-	cout << "DataCTAMsg::DataCTAMsg: time: " << time << endl;
 
 	_bitstreamSize = bitstream->size();
 }
@@ -76,6 +72,7 @@ void DataCTAMsg::serialize(Archive &ar) {
 	ar & _txTime;
 	ar & _data;
 	ar & _operativeMode;
+	ar & _startTick;
 }
 Bitstream* DataCTAMsg::getBitStream() const {
 	stringstream bitstream;

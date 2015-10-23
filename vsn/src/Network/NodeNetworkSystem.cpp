@@ -424,8 +424,11 @@ float NodeNetworkSystem::prepareWifiBandwidthControl(const string sinkIpAddr_,
 					<< ret << endl;
 
 		ss.str("");
-		ss << "sudo tc qdisc add dev " << _linkInterface
-				<< " root handle 1: cbq avpkt 1000 bandwidth 54mbit" << endl;
+		/*ss << "sudo tc qdisc add dev " << _linkInterface
+				<< " root handle 1: cbq avpkt 1000 bandwidth 16mbit" << endl;
+				*/
+		ss << "sudo tc qdisc add dev "<< _linkInterface
+						<< " root handle 1: htb " << endl;
 		if (_DEBUG)
 			cout << "NodeProcessingSystem::_prepareWifiBandwidthControl: "
 					<< ss.str();
@@ -459,7 +462,7 @@ float NodeNetworkSystem::prepareWifiBandwidthControl(const string sinkIpAddr_,
 					<< ret << endl;
 
 		ss.str("");
-		ss << "sudo iptables -t mangle -A POSTROUTING -p tcp --dport "
+		ss << "sudo iptables -t mangle -I POSTROUTING 1 -p tcp --dport "
 				<< sinkPort_ << " -d " << sinkIpAddr_
 				<< " -j MARK --set-mark 100" << endl;
 		if (_DEBUG)
@@ -494,9 +497,15 @@ void NodeNetworkSystem::_setWifiBandwidthThread() {
 
 	stringstream ss;
 	ss.str("");
-	ss << "sudo tc class replace dev " << _linkInterface
+	// CBQ
+	/*ss << "sudo tc class replace dev " << _linkInterface
 			<< " parent 1: classid 1:1 cbq rate " << _wifiBandwidth
 			<< "kbit allot 1500 prio 5 bounded isolated" << endl;
+	 */
+	ss << "sudo tc class replace dev " << _linkInterface
+			<< " parent 1: classid 1:1 htb rate " << _wifiBandwidth
+			<< "kbit burst 1 ceil " << _wifiBandwidth
+			<< "kbit cburst 1" << endl;
 
 	if (_DEBUG)
 		cout << "NodeProcessingSystem::_setWifiBandwidthThread: " << ss.str();

@@ -306,7 +306,7 @@ void NodeProcessingSystem::_cameraProcessing(Message* msg) {
 					sliceIdx, numSlices , topLeftCorner.width, topLeftCorner.height,
 					encodedSliceBitstream.size(), encodingTime,
 					transmissionTime, encodedSliceBitstream,
-					message->getOperativeMode());
+					message->getOperativeMode(),0);
 
 			_nodeNetworkSystem->sendMessage(reply);
 
@@ -453,7 +453,7 @@ void NodeProcessingSystem::_cameraProcessing(Message* msg) {
 					descriptionTime, 0, 0, 0, keypoints.size(),
 					keypoints.size(), wholeImageSize.width,
 					wholeImageSize.height, featBitstream, kptsBistream,
-					message->getOperativeMode());
+					message->getOperativeMode(),0);
 
 			if (_DEBUG > 1)
 				cout
@@ -976,7 +976,7 @@ void NodeProcessingSystem::_sendATC(const std::vector<cv::KeyPoint>& keypoints,
 					transmissionTime, numFeaturesPerBlock, numKeypointsPerBlock,
 					imageSize.width, imageSize.height,
 					featuresBitstreamPerBlock, keypointsBitstreamPerBlock,
-					opMode);
+					opMode,0);
 
 			_nodeNetworkSystem->sendMessage(reply);
 		}
@@ -998,7 +998,7 @@ void NodeProcessingSystem::_sendATC(const std::vector<cv::KeyPoint>& keypoints,
 				descriptionTime, keypointEncodingTime, featuresEncodingTime,
 				transmissionTime, numFeaturesPerBlock, numKeypointsPerBlock,
 				imageSize.width, imageSize.height, featuresBitstreamPerBlock,
-				keypointsBitstreamPerBlock, opMode);
+				keypointsBitstreamPerBlock, opMode,0);
 
 		_nodeNetworkSystem->sendMessage(reply);
 

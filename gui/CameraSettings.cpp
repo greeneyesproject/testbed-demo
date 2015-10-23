@@ -689,6 +689,11 @@ void CameraSettings::toggleCameraSlot(){
         /* send stop message */
         _guiProcessingSystem->sendStop(_selectedCamera);
         _selectedCamera->setActive(false);
+        if (_selectedCamera->getNbs()){
+            Camera* bargainCamera = _selectedCamera->getBargainCamera();
+            _guiProcessingSystem->sendStop(bargainCamera);
+            bargainCamera->setActive(false);
+        }
     }
     setSelectedCameraParameters();
 }
@@ -722,11 +727,22 @@ void CameraSettings::nbsToggledSlot(bool value){
 
         bargainingCamera->setShowReconstruction(false);
         bargainingCamera->setTrackingEnabled(false);
+
     }
 
     _alignNbs();
 
     setSelectedCameraParameters();
+
+    if (value){
+        if (_selectedCamera->getActive()){
+            bargainingCamera->setActive(true);
+            _guiProcessingSystem->sendStartATCNBS(_selectedCamera);
+        }else{
+            bargainingCamera->setActive(false);
+            _guiProcessingSystem->sendStop(_selectedCamera);
+        }
+    }
 }
 
 void CameraSettings::nbsSelectSlot(){

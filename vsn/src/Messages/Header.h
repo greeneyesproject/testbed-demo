@@ -8,7 +8,7 @@
 #ifndef SRC_MESSAGES_HEADER_H_
 #define SRC_MESSAGES_HEADER_H_
 
-#define HEADER_SIZE_IP 21
+#define HEADER_SIZE_IP 13
 #define HEADER_SIZE_TELOS_PROTO 8
 #define HEADER_SIZE_TELOS_APP 13
 
@@ -34,13 +34,12 @@ public:
 		_msg_t = MESSAGETYPE_NONE;
 		_linkType = LINKTYPE_UNDEF;
 		_payload_size = 0;
-		_sendStartTxTick = 0;
 	}
 
 	Header(NetworkNode* const src, NetworkNode* const dst,
 			const uint8_t msgSeqNum, const uint16_t numPackets,
 			const uint16_t packetIdx, const MessageType msgType,
-			const LinkType linkType, const uint32_t payloadSize, const int64 startTxTick);
+			const LinkType linkType, const uint32_t payloadSize);
 
 	static Header* headerFromIpBitstream(Bitstream* bitstream);
 	static Header* headerFromTelosBitstream(Bitstream* const bitstream);
@@ -83,10 +82,6 @@ public:
 		return _payload_size;
 	}
 
-	int64 getStartTick() const{
-		return _sendStartTxTick;
-	}
-
 private:
 
 	const static unsigned char _DEBUG = 1;
@@ -99,7 +94,6 @@ private:
 	uint16_t _num_packets;	// Total number of packets composing the message
 	uint8_t _seq_num;      // Sequence number (for duplicates detection)
 	uint32_t _payload_size; // Number of bytes to be read
-	int64 _sendStartTxTick;
 
 	LinkType _linkType;	//Network technology/protocol
 

@@ -143,7 +143,7 @@ void TelosbRadioSystem::_senderThreadHandler() {
 		/* Prepare the header */
 		Header header(msg->getSrc(), msg->getDst(), msg->getSeqNum(),
 				totPackets, packetIdx, msg->getType(), LINKTYPE_TELOS,
-				remainingBytes, 0);
+				remainingBytes);
 
 		bool notifySendEnd = msg->getType() == MESSAGETYPE_DATA_ATC
 				|| msg->getType() == MESSAGETYPE_DATA_CTA;

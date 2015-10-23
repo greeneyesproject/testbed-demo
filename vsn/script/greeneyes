@@ -24,7 +24,7 @@ case "$1" in
 		fi
 
 		if [ -f log.txt ]
-		then mv log.txt log.prev.txt
+		then tail -c 10M log.txt > log.prev.txt
 		fi
 		
 		ifup wlan0 >>log.txt 2>&1

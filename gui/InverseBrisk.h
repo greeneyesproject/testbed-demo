@@ -41,6 +41,9 @@ private:
 
     inverse_BRISK(VisualFeatureExtraction*, int imWidth = 640, int imHeight = 480);
     static inverse_BRISK* _instance;
+
+    vector<bool> _running;
+
 public:
 
     static inverse_BRISK* getinverse_BRISK(VisualFeatureExtraction*, int imWidth = 640, int imHeight = 480);
@@ -55,6 +58,8 @@ public:
     int scale_rot_patch(Mat inPatch, Mat &outPatch, Mat &mask, Mat &contour, float theta, float scale);
     void poisson_stitching(IplImage *srcImage, IplImage *destImage, IplImage *maskImage);
     void poisson_stitch(Mat srcPatch, Mat srcMask, Mat dst, Mat dstMask);
+
+    bool isRunning(int camId)const{return _running.at(camId);}
 
     int getDir (string dir, vector<string> &files)
     {
@@ -84,7 +89,7 @@ public:
 
 public slots:
 
-    void invertBRISKOnCam(int camId);
+    void invertBRISKOnCamSlot(int camId);
 };
 
 

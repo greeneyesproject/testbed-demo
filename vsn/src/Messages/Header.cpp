@@ -21,7 +21,6 @@ ostream& operator <<(ostream& os, const Header& header) {
 	os << " num packets: " << header.getNumPackets();
 	os << " seq num: " << header.getSeqNum();
 	os << " payload size: " << header.getPayloadSize();
-	os << " start Tx tick: " << header.getStartTick();
 
 	return os;
 }
@@ -29,8 +28,7 @@ ostream& operator <<(ostream& os, const Header& header) {
 Header::Header(NetworkNode* const src, NetworkNode* const dst,
 		const uint8_t msgSeqNum, const uint16_t totPackets,
 		const uint16_t packetIdx, const MessageType messageType,
-		const LinkType linkType, const uint32_t payload,
-		const int64 startTxTick) {
+		const LinkType linkType, const uint32_t payload) {
 
 	/**
 	 * Source NetworkNode. Null if the node is unknown locally
@@ -46,8 +44,6 @@ Header::Header(NetworkNode* const src, NetworkNode* const dst,
 	_num_packets = totPackets;
 	_seq_num = msgSeqNum; //local sequential number, to
 	_payload_size = payload;
-
-	_sendStartTxTick = startTxTick;
 
 	_linkType = linkType;
 
@@ -74,14 +70,6 @@ Header* Header::headerFromIpBitstream(Bitstream* bitstream) {
 	 10	PayloadSize -
 	 11	PayloadSize -
 	 12	PayloadSizeMSB
-	 13	SenderStartTxTickMSB
-	 14	SenderStartTxTick -
-	 15	SenderStartTxTick -
-	 16	SenderStartTxTick -
-	 17	SenderStartTxTick -
-	 18	SenderStartTxTick -
-	 19	SenderStartTxTick -
-	 20	SenderStartTxTickLSB
 	 */
 
 	uint8_t byteIdx = 0;
@@ -128,25 +116,6 @@ Header* Header::headerFromIpBitstream(Bitstream* bitstream) {
 	temp32 |= bitstream->at(byteIdx++);
 	uint32_t payload_size = ntohl(temp32);
 
-	/* StartTxTick size */
-	temp64 = 0;
-	temp64 |= bitstream->at(byteIdx++);
-	temp64 <<= 8;
-	temp64 |= bitstream->at(byteIdx++);
-	temp64 <<= 8;
-	temp64 |= bitstream->at(byteIdx++);
-	temp64 <<= 8;
-	temp64 |= bitstream->at(byteIdx++);
-	temp64 <<= 8;
-	temp64 |= bitstream->at(byteIdx++);
-	temp64 <<= 8;
-	temp64 |= bitstream->at(byteIdx++);
-	temp64 <<= 8;
-	temp64 |= bitstream->at(byteIdx++);
-	temp64 <<= 8;
-	temp64 |= bitstream->at(byteIdx++);
-	int64 startTxTick = temp64;
-
 	/* If the node is not present in the local NetworkNode database the pointer is null! */
 	NetworkNode* src = NetworkNode::getNodeById(srcId);
 	NetworkNode* dst = NetworkNode::getNodeById(dstId);
@@ -163,7 +132,7 @@ Header* Header::headerFromIpBitstream(Bitstream* bitstream) {
 	delete bitstream;
 
 	return new Header(src, dst, seq_num, num_packets, packet_idx, msg_t,
-			linkType, payload_size, startTxTick);
+			linkType, payload_size);
 
 }
 
@@ -235,7 +204,7 @@ Header* Header::headerFromTelosBitstream(Bitstream* const bitstream) {
 	NetworkNode* dst = NetworkNode::getNodeById(dstId);
 
 	return new Header(src, dst, seq_num, num_packets, packet_idx, msg_t,
-			linkType, payloadSize, 0);
+			linkType, payloadSize);
 }
 
 Bitstream* Header::serializeForTelosPacket(const uint16_t packetIdx,
@@ -336,14 +305,6 @@ Bitstream* Header::serializeForIpPacket() const {
 	 10	PayloadSize -
 	 11	PayloadSize -
 	 12	PayloadSizeMSB
-	 13	SenderStartTxTickMSB
-	 14	SenderStartTxTick -
-	 15	SenderStartTxTick -
-	 16	SenderStartTxTick -
-	 17	SenderStartTxTick -
-	 18	SenderStartTxTick -
-	 19	SenderStartTxTick -
-	 20	SenderStartTxTickLSB
 	 */
 
 	Bitstream* bitstream = new vector<uchar>(HEADER_SIZE_IP);
@@ -382,17 +343,6 @@ Bitstream* Header::serializeForIpPacket() const {
 	bitstream->at(byteIdx++) = ((temp32 >> 16) & 0xFF);
 	bitstream->at(byteIdx++) = ((temp32 >> 8) & 0xFF);
 	bitstream->at(byteIdx++) = ((temp32) & 0xFF);
-
-	/* StartTxTick */
-	temp64 = _sendStartTxTick;
-	bitstream->at(byteIdx++) = ((temp64 >> 56) & 0xFF);
-	bitstream->at(byteIdx++) = ((temp64 >> 48) & 0xFF);
-	bitstream->at(byteIdx++) = ((temp64 >> 40) & 0xFF);
-	bitstream->at(byteIdx++) = ((temp64 >> 32) & 0xFF);
-	bitstream->at(byteIdx++) = ((temp64 >> 24) & 0xFF);
-	bitstream->at(byteIdx++) = ((temp64 >> 16) & 0xFF);
-	bitstream->at(byteIdx++) = ((temp64 >> 8) & 0xFF);
-	bitstream->at(byteIdx++) = ((temp64) & 0xFF);
 
 	return bitstream;
 }

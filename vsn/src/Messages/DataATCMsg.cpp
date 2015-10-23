@@ -9,7 +9,7 @@ DataATCMsg::DataATCMsg(NetworkNode* const src, NetworkNode* const dst,
 		const ushort numBlocks, const float detTime, const float descTime,
 		const float kptsEncTime, const float featEncTime, const float txTime,
 		const ushort numFeat, const ushort numKpts, const ushort frameWidth_, const ushort frameHeight_,
-		const Bitstream& features_data, const Bitstream& keypoints_data, const OperativeMode opMode) :
+		const Bitstream& features_data, const Bitstream& keypoints_data, const OperativeMode opMode, const int64 startTick) :
 		Message(src, dst, linkType) {
 
 	_msg_type = MESSAGETYPE_DATA_ATC;
@@ -29,6 +29,7 @@ DataATCMsg::DataATCMsg(NetworkNode* const src, NetworkNode* const dst,
 	_featuresData = features_data;
 	_kptsData = keypoints_data;
 	_operativeMode = opMode;
+	_startTick = startTick;
 }
 
 DataATCMsg::DataATCMsg(Header* const header, Bitstream* const bitstream) :
@@ -49,6 +50,7 @@ DataATCMsg::DataATCMsg(Header* const header, Bitstream* const bitstream) :
 	_operativeMode = 0;
 	_frameWidth = 0;
 	_frameHeight = 0;
+	_startTick = 0;
 
 
 	stringstream ss;
@@ -76,6 +78,7 @@ void DataATCMsg::serialize(Archive &ar) {
 	ar & _featuresData;
 	ar & _kptsData;
 	ar & _operativeMode;
+	ar & _startTick;
 }
 
 Bitstream* DataATCMsg::getBitStream() const {

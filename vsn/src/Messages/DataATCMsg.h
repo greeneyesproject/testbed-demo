@@ -29,6 +29,7 @@ private:
 	std::vector<uchar> _featuresData;
 	std::vector<uchar> _kptsData;
 	uchar _operativeMode;
+	int64 _startTick;
 
 public:
 	DataATCMsg(NetworkNode* const src, NetworkNode* const dst,
@@ -38,7 +39,8 @@ public:
 			const float featEncTime, const float txTime, const ushort numFeat,
 			const ushort numKpts, const ushort frameWidth_,
 			const ushort frameHeight_, const Bitstream& features_data,
-			const Bitstream& keypoints_data, const OperativeMode opMode);
+			const Bitstream& keypoints_data, const OperativeMode opMode,
+			const int64 startTick);
 	DataATCMsg(Header* const header, Bitstream* const bitstream);
 
 	Bitstream* getBitStream() const;
@@ -90,6 +92,12 @@ public:
 	}
 	OperativeMode getOperativeMode() const {
 		return (OperativeMode) _operativeMode;
+	}
+	int64 getStartTick() const {
+		return _startTick;
+	}
+	void setStartTick(const int64 startTick) {
+		_startTick = startTick;
 	}
 };
 
