@@ -55,6 +55,7 @@ Camera::Camera(uint id, uint am_address, string ip_address, NetworkItem* network
     _tempTxTime = 0;
     _processingEnergy = 0;
     _txEnergy = 0;
+    _frameRate = 0;
 
 
     _CTAFrame = cv::Mat(FRAME_H, FRAME_W, CV_8UC3);

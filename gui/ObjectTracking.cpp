@@ -274,10 +274,12 @@ int ObjectTracking::trackObject(int camIdx, int opMode){
         sorted_idxs.clear();
         sort_like_matlab(ranked_list,ranked_list,sorted_idxs,1);
         string rec_object;
+        /*
         cout << "SORTED IDXS" << endl;
         for(size_t i=0;i<ranked_list.size();i++){
             cout << sorted_idxs[i] << " " << ranked_list[i] << endl;
         }
+        */
 
         // group the object of the same class
         vector<int> classScore (_dbDesc.size(),0);
@@ -299,10 +301,12 @@ int ObjectTracking::trackObject(int camIdx, int opMode){
                     break;
             }
             rec_object = _dbObj[i];
+            /*
             cout << "OBJECT: " << _dbObj[i] << endl;
             for( i=0; i<classScore.size(); i++){
                 cout << "CLASS " << sorted_idxs_class[i] << " , rank = " << classScore[i] << endl;
             }
+            */
         }
         else{
             rec_object = "not recognized";

@@ -202,8 +202,8 @@ void Session::_handleReadMessage(const boost::system::error_code& error,
 				if (_DEBUG)
 					cout << "Session::_sendMessageThread: sendTxStartTick: "
 							<< ackMsg->getSendTxStartTick() << endl;
-				float time = (double) (cv::getTickCount()
-						- ackMsg->getSendTxStartTick())
+				int64 nowTick = cv::getTickCount();
+				float time = (double) (nowTick - ackMsg->getSendTxStartTick())
 						/ cv::getTickFrequency();
 				if (time > FLT_MIN) {
 					switch (ackMsg->getReceivedMessageType()) {
@@ -223,6 +223,15 @@ void Session::_handleReadMessage(const boost::system::error_code& error,
 						break;
 					default:
 						break;
+					}
+				} else {
+					if (_DEBUG) {
+						cout
+								<< "Session::_sendMessageThread: time = 0: nowTick "
+								<< nowTick << endl;
+						cout
+								<< "Session::_sendMessageThread: time = 0: ackMsg->getSendTxStartTick() "
+								<< ackMsg->getSendTxStartTick() << endl;
 					}
 				}
 				break;
@@ -254,19 +263,6 @@ void Session::writeMessage(Message* msg) {
 		cout << "Session::writeMessage" << endl;
 	if (msg == NULL) {
 		throw "Session::writeMessage: empty message";
-	}
-
-	int64 tick = cv::getTickCount();
-
-	switch (msg->getType()) {
-	case MESSAGETYPE_DATA_ATC:
-		((DataATCMsg*) msg)->setStartTick(tick);
-		break;
-	case MESSAGETYPE_DATA_CTA:
-		((DataCTAMsg*) msg)->setStartTick(tick);
-		break;
-	default:
-		break;
 	}
 
 	_messagesQueue.push(msg);

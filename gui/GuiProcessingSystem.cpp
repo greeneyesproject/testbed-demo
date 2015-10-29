@@ -219,12 +219,15 @@ void GuiProcessingSystem::processDataATCMsg(Camera* camera, DataATCMsg* msg){
         camera->setTempTxTime(camera->getTempTxTime() + msg->getTxTime());
     }else{
         camera->setTempTxTime(msg->getTxTime());
+        qDebug() << "GuiProcessingSystem::processDataATCMsg: msg->getBlockNumber(): " << msg->getBlockNumber();
+        qDebug() << "GuiProcessingSystem::processDataATCMsg: msg->getTxTime(): " << msg->getTxTime();
     }
 
     cv::Mat features;
     vector<cv::KeyPoint> keypoints;
 
     camera->atc_param.framePayloadSize += msg->getBitstreamSize();
+    qDebug() << "GuiProcessingSystem::processDataATCMsg: msg->getBitstreamSize(): " << msg->getBitstreamSize();
 
     /* This copy is necessary since the ac_encoder doesn't accept const vector<uchar> */
     const vector<uchar>* kp_bitstream = msg->getKeypointsData();
@@ -336,9 +339,9 @@ void GuiProcessingSystem::processDataATCMsg(Camera* camera, DataATCMsg* msg){
         if(msg->getBlockNumber() == msg->getNumBlocks()-1){
 
             float bandwidth = (double)( camera->atc_param.framePayloadSize*8.0/1024.0 )/camera->getTempTxTime();
-            qDebug() << "GuiProcessingSystem::processDataCTAMsg: camera->atc_param.framePayloadSize: " << camera->atc_param.framePayloadSize << endl;
-            qDebug() << "GuiProcessingSystem::processDataCTAMsg: camera->getTempTxTime(): " << camera->getTempTxTime() << endl;
-            qDebug() << "GuiProcessingSystem::processDataCTAMsg: bandwidth: " << bandwidth << endl;
+            qDebug() << "GuiProcessingSystem::processDataCTAMsg: camera->atc_param.framePayloadSize: " << camera->atc_param.framePayloadSize;
+            qDebug() << "GuiProcessingSystem::processDataCTAMsg: camera->getTempTxTime(): " << camera->getTempTxTime();
+            qDebug() << "GuiProcessingSystem::processDataCTAMsg: bandwidth: " << bandwidth;
             emit camera->curBandwidthChangedSignal(camera->getGuiIdx(), bandwidth);
 
 
@@ -364,8 +367,6 @@ void GuiProcessingSystem::processDataATCMsg(Camera* camera, DataATCMsg* msg){
             camera->setTempProcTime(0);
             camera->setTempTxTime(0);
 
-            /* Notify ObjectTracking, PerformanceManager */
-            emit camera->frameCompletedSignal(camera->getGuiIdx(),msg->getOperativeMode());
 
             if (camera->getShowReconstruction()){
                 cout << "GuiProcessingSystem::processDataATCMsg: emitting reconstruct frame on camera " << *camera << endl;
@@ -390,6 +391,9 @@ void GuiProcessingSystem::processDataATCMsg(Camera* camera, DataATCMsg* msg){
                 }
                 break;
             }
+
+            /* Notify ObjectTracking, PerformanceManager */
+            emit camera->frameCompletedSignal(camera->getGuiIdx(),msg->getOperativeMode());
 
             endOfFrame(camera);
         }

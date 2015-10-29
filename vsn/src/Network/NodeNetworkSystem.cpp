@@ -413,6 +413,17 @@ float NodeNetworkSystem::prepareWifiBandwidthControl(const string sinkIpAddr_,
 				<< _linkInterface << endl;
 
 	if (!_lo) {
+
+		ss.str("");
+		ss << "sudo ip link set dev " << _linkInterface << " mtu 256" << endl;
+		if (_DEBUG)
+			cout << "NodeProcessingSystem::_prepareWifiBandwidthControl: "
+					<< ss.str();
+		ret = system(ss.str().c_str());
+		if (_DEBUG)
+			cout << "NodeProcessingSystem::_prepareWifiBandwidthControl: ret: "
+					<< ret << endl;
+
 		ss.str("");
 		ss << "sudo tc qdisc del dev " << _linkInterface << " root" << endl;
 		if (_DEBUG)
@@ -425,10 +436,10 @@ float NodeNetworkSystem::prepareWifiBandwidthControl(const string sinkIpAddr_,
 
 		ss.str("");
 		/*ss << "sudo tc qdisc add dev " << _linkInterface
-				<< " root handle 1: cbq avpkt 1000 bandwidth 16mbit" << endl;
-				*/
-		ss << "sudo tc qdisc add dev "<< _linkInterface
-						<< " root handle 1: htb " << endl;
+		 << " root handle 1: cbq avpkt 1000 bandwidth 16mbit" << endl;
+		 */
+		ss << "sudo tc qdisc add dev " << _linkInterface
+				<< " root handle 1: htb " << endl;
 		if (_DEBUG)
 			cout << "NodeProcessingSystem::_prepareWifiBandwidthControl: "
 					<< ss.str();
@@ -438,14 +449,21 @@ float NodeNetworkSystem::prepareWifiBandwidthControl(const string sinkIpAddr_,
 					<< ret << endl;
 
 		ss.str("");
+		/*
 		ss << "sudo tc class replace dev " << _linkInterface
 				<< " parent 1: classid 1:1 cbq rate " << _wifiBandwidth
 				<< "kbit allot 1500 prio 5 bounded isolated" << endl;
+				*/
+		ss << "sudo tc class replace dev " << _linkInterface
+					<< " parent 1: classid 1:1 htb rate " << _wifiBandwidth
+					<< "kbit burst 1 ceil " << _wifiBandwidth << "kbit cburst 1"
+					<< endl;
+
 		if (_DEBUG)
 			cout << "NodeProcessingSystem::_prepareWifiBandwidthControl: "
 					<< ss.str();
 		ret = system(ss.str().c_str());
-		if (_DEBUG > 1)
+		if (_DEBUG)
 			cout << "NodeProcessingSystem::_prepareWifiBandwidthControl: ret: "
 					<< ret << endl;
 
@@ -499,17 +517,18 @@ void NodeNetworkSystem::_setWifiBandwidthThread() {
 	ss.str("");
 	// CBQ
 	/*ss << "sudo tc class replace dev " << _linkInterface
-			<< " parent 1: classid 1:1 cbq rate " << _wifiBandwidth
-			<< "kbit allot 1500 prio 5 bounded isolated" << endl;
+	 << " parent 1: classid 1:1 cbq rate " << _wifiBandwidth
+	 << "kbit allot 1500 prio 5 bounded isolated" << endl;
 	 */
 	ss << "sudo tc class replace dev " << _linkInterface
 			<< " parent 1: classid 1:1 htb rate " << _wifiBandwidth
-			<< "kbit burst 1 ceil " << _wifiBandwidth
-			<< "kbit cburst 1" << endl;
+			<< "kbit burst 1 ceil " << _wifiBandwidth << "kbit cburst 1"
+			<< endl;
 
 	if (_DEBUG)
 		cout << "NodeProcessingSystem::_setWifiBandwidthThread: " << ss.str();
 	ret = system(ss.str().c_str());
 	if (_DEBUG)
-		cout << "NodeProcessingSystem::_setWifiBandwidthThread: ret: " << ret << endl;
+		cout << "NodeProcessingSystem::_setWifiBandwidthThread: ret: " << ret
+				<< endl;
 }

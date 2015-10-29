@@ -267,6 +267,8 @@ void NodeProcessingSystem::_cameraProcessing(Message* msg) {
 
 		_gpios[1]->setValue(BlackLib::low);  //Reset acquisition pin
 
+		int64 firstStartTick;
+
 		unsigned char numSlices = message->getNumSlices();
 		unsigned char qf = message->getQualityFactor();
 		for (unsigned char sliceIdx = 0; sliceIdx < numSlices; ++sliceIdx) {
@@ -301,12 +303,17 @@ void NodeProcessingSystem::_cameraProcessing(Message* msg) {
 				cout
 						<< "NodeProcessingSystem::_cameraProcessing: sending slice "
 						<< endl;
+
+			if (sliceIdx == 0){
+				firstStartTick = cv::getTickCount();
+			}
+
 			DataCTAMsg* reply = new DataCTAMsg(NetworkNode::getMyself(),
 					NetworkNode::getSink(), msg->getLinkType(), _frameId,
 					sliceIdx, numSlices , topLeftCorner.width, topLeftCorner.height,
 					encodedSliceBitstream.size(), encodingTime,
 					transmissionTime, encodedSliceBitstream,
-					message->getOperativeMode(),0);
+					message->getOperativeMode(),firstStartTick);
 
 			_nodeNetworkSystem->sendMessage(reply);
 
@@ -926,6 +933,8 @@ void NodeProcessingSystem::_sendATC(const std::vector<cv::KeyPoint>& keypoints,
 
 	const unsigned short totFeatures = features.rows;
 
+	int64 firstStartTick;
+
 	if (totFeatures) {
 		unsigned char numBlocks = ceil(
 				(float) totFeatures / (float) (featuresPerBlock));
@@ -969,14 +978,16 @@ void NodeProcessingSystem::_sendATC(const std::vector<cv::KeyPoint>& keypoints,
 						<< "NodeProcessingSystem::_sendATC: ATC: features in block "
 						<< (int) blockIdx << ": " << numFeaturesPerBlock
 						<< endl;
-
+			if (blockIdx == 0){
+				firstStartTick = cv::getTickCount();
+			}
 			DataATCMsg *reply = new DataATCMsg(NetworkNode::getMyself(), dst,
 					linkType, _frameId, blockIdx, numBlocks, detectionTime,
 					descriptionTime, keypointEncodingTime, featuresEncodingTime,
 					transmissionTime, numFeaturesPerBlock, numKeypointsPerBlock,
 					imageSize.width, imageSize.height,
 					featuresBitstreamPerBlock, keypointsBitstreamPerBlock,
-					opMode,0);
+					opMode,firstStartTick);
 
 			_nodeNetworkSystem->sendMessage(reply);
 		}

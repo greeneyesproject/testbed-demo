@@ -210,20 +210,8 @@ void PerformanceManager::checkResetTimerCount(){
     //}
 }
 
-//void PerformanceManager::increaseFrameCount(int guiIdx){
-
-//    cout << "frame count increased on camera " << guiIdx << endl;
-//    _completedFrame[guiIdx]++;
-//}
-
 void PerformanceManager::startLogging(){
-
-    cout << "logging started" << endl;
     _timer->start(_timerFreq);
-    cout << "timer started" << endl;
-    //qDebug() << "Parent of timer is" << _timer->parent();
-
-
 }
 
 void PerformanceManager::stopLogging(){
@@ -233,13 +221,10 @@ void PerformanceManager::stopLogging(){
 
 void PerformanceManager::connectTasks(){
 
-    cout << "connecting performance manager task" << endl;
-
     _timer = new QTimer(this);
 
     for (int c = 0; c < _nCameras; c++){
         Camera* cur_cam = (*(_cameras))[c];
-        //connect(cur_cam, SIGNAL(frameCompletedSignal(int,int)), this, SLOT(increaseFrameCount(int,int)));
         connect(cur_cam, SIGNAL(stoppedSignal(int)), this, SLOT(stopFrameRateTimer(int)));
         connect(cur_cam, SIGNAL(startSentSignal(int, bool)), this, SLOT(resetFrameRateTimer(int, bool)));
         connect(cur_cam, SIGNAL(frameCompletedSignal(int,int)), this, SLOT(endOfFrame(int,int)));
@@ -382,7 +367,6 @@ void PerformanceManager::setStatusTxTime(const vector<list<double> > &statusTxTi
  */
 void PerformanceManager::endOfFrame(int camGuiIdx, int opmode){
 
-    //qDebug() << "end of frame, performance handler";
 
     unsigned int time = _curFrameTimer[camGuiIdx]->elapsed();
     if (_lastFrameTimings[camGuiIdx].size() >= _windowSize){
@@ -390,8 +374,9 @@ void PerformanceManager::endOfFrame(int camGuiIdx, int opmode){
     }
     _lastFrameTimings[camGuiIdx].push_back(time);
 
-    //qDebug() << "Frame finished: " << time << " ms elapsed.";
-    //qDebug() << "ok";
+    /* fps real */
+    //_curFrameTimer[camGuiIdx]->restart();
+
 }
 
 /**
@@ -403,15 +388,20 @@ void PerformanceManager::endOfFrame(int camGuiIdx, int opmode){
 void PerformanceManager::resetFrameRateTimer(int camId, bool reset_history){
 
     ushort cam_index = Camera::getCameraById(camId)->getGuiIdx();
-//    if (reset_history){
-//        _lastFrameTimings[cam_index].clear();
-//    }
+
+    /* fps as inverse rt */
     _curFrameTimer[cam_index]->restart();
-    //qDebug() << "New start frame message: Framerate timer started on camera " << cam_index;
+
+    /* fps real */
+    //if (!_curFrameTimer[cam_index]->isValid()){
+    //_curFrameTimer[cam_index]->start();
+    //}
 }
 
 void PerformanceManager::stopFrameRateTimer(int camId){
-    _lastFrameTimings[Camera::getCameraById(camId)->getGuiIdx()].clear();
+    ushort cam_index = Camera::getCameraById(camId)->getGuiIdx();
+    _lastFrameTimings[cam_index].clear();
+    _curFrameTimer[cam_index]->invalidate();
 }
 
 
