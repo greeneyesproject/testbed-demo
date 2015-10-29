@@ -6,8 +6,6 @@ The software provided here is a sample application easily extensible and re-usab
 
 This document will guide you step-by-step to the setup and use of the provided software. This manual has been tested on Ubuntu 14.04LTS 64bit.
 
-If you are not familiar with linux bash, ssh, make and c++ programming you should probably stop here and come back after having attended a computer science class.
-
 ### Prerequisites
 
 * Linux equipped PC with
@@ -50,7 +48,7 @@ Since we know how much time and effort we needed to prepare a working OS for the
 The image is available without any warranty, but it can really get your life easier.
 
 #### Flashing your microSD card
-1. Download and `tar xf` the mbr image (ftp://ftp.elet.polimi.it/outgoing/Luca.Bondi/greeneyes/bbb-mbr-20150903.tar.gz) and the rootfs image (ftp://ftp.elet.polimi.it/outgoing/Luca.Bondi/greeneyes/bbb-rootfs-20150903.tar.gz)
+1. Download and `tar xf` the mbr image (ftp://ftp.elet.polimi.it/outgoing/Luca.Bondi/greeneyes/bbb-mbr-20150904.tar.gz) and the rootfs image (ftp://ftp.elet.polimi.it/outgoing/Luca.Bondi/greeneyes/bbb-rootfs-20150904.tar.gz)
 2. Insert yout SD card and check the device path (e.g. /dev/mmcblk0)
 3. Unmount all the SD card partitions
 4. Flash the MBR to the SD card: `sudo dd if=bbb-mbr-XXXXYYZZ.img of=/dev/mmcblk0`
@@ -112,6 +110,5 @@ To configure multiple BeagleBone repeat the procedure above for each one. The se
 5. From the `vsn/` folder launch the SINK node with `./build-host/greeneyes-vsn sink 1 --telos /dev/ttyUSB0`
 6. From the GUI control the system and enjoy your running Visual Senso Network
 
-## Credits
 
 
