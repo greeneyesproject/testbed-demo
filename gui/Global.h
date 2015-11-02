@@ -21,7 +21,7 @@ typedef unsigned char uchar;
 #define TX_POWER_TELOS_BBB 1.625 //TX + IDLE
 #define TX_POWER_WIFI_BBB (1.122+1.5) //tx + IDLE
 
-#define WIFI_BW_DEFAULT 23 //kbps. 23kbps gives the same application framerate as telosb
+#define WIFI_BW_DEFAULT 30 //kbps. 30kbps gives the same application framerate as telosb
 
 #define MAX_FEAT 200
 #define MIN_FEAT 10

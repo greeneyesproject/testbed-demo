@@ -89,7 +89,11 @@ void GuiProcessingSystem::processDataCTAMsg(Camera *camera, DataCTAMsg* msg){
         qDebug() << "GuiProcessingSystem::processDataCTAMsg: camera->cta_param.framePayloadSize: " << camera->cta_param.framePayloadSize << endl;
         qDebug() << "GuiProcessingSystem::processDataCTAMsg: camera->getTempTxTime(): " << camera->getTempTxTime() << endl;
         qDebug() << "GuiProcessingSystem::processDataCTAMsg: bandwidth: " << bandwidth << endl;
-        emit camera->curBandwidthChangedSignal(camera->getGuiIdx(), bandwidth);
+        if (camera->getLinkType()==LINKTYPE_TCP){
+            emit camera->curBandwidthChangedSignal(camera->getGuiIdx(), camera->getWifiBw());
+        }else{
+            emit camera->curBandwidthChangedSignal(camera->getGuiIdx(), bandwidth);
+        }
 
         double energy=0;
         camera->setProcessingEnergy(camera->getTempProcTime() * CPU_POWER_BBB);    // switch to energy
@@ -342,7 +346,11 @@ void GuiProcessingSystem::processDataATCMsg(Camera* camera, DataATCMsg* msg){
             qDebug() << "GuiProcessingSystem::processDataCTAMsg: camera->atc_param.framePayloadSize: " << camera->atc_param.framePayloadSize;
             qDebug() << "GuiProcessingSystem::processDataCTAMsg: camera->getTempTxTime(): " << camera->getTempTxTime();
             qDebug() << "GuiProcessingSystem::processDataCTAMsg: bandwidth: " << bandwidth;
-            emit camera->curBandwidthChangedSignal(camera->getGuiIdx(), bandwidth);
+            if (camera->getLinkType()==LINKTYPE_TCP){
+                emit camera->curBandwidthChangedSignal(camera->getGuiIdx(), camera->getWifiBw());
+            }else{
+                emit camera->curBandwidthChangedSignal(camera->getGuiIdx(), bandwidth);
+            }
 
 
             camera->setGoodDescriptors(camera->getDescriptors());
